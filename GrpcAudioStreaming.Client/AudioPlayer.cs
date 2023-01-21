@@ -1,6 +1,6 @@
+using NAudio.Wave;
 using System;
 using System.Diagnostics;
-using NAudio.Wave;
 
 namespace GrpcAudioStreaming.Client
 {
@@ -12,7 +12,7 @@ namespace GrpcAudioStreaming.Client
         public AudioPlayer(WaveFormat waveFormat)
         {
             _wavePlayer = new WaveOutEvent();
-            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) {BufferDuration = TimeSpan.FromSeconds(5)};
+            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) { BufferDuration = TimeSpan.FromMilliseconds(100) };
             _wavePlayer.Init(_bufferedWaveProvider);
         }
 

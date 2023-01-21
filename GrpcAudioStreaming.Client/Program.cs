@@ -3,9 +3,10 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using System;
 using System.Net.Http;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Forms;
 
 namespace GrpcAudioStreaming.Client
 {
@@ -13,37 +14,23 @@ namespace GrpcAudioStreaming.Client
     {
         private static async Task Main(string[] args)
         {
-            try
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            Application.Run(new CustomApplicationContext());
+
+            while (true)
             {
-                // When calling insecure gRPC services this switch must be set before creating the GrpcChannel/HttpClient.
-                // https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-3.0#call-insecure-grpc-services-with-net-core-client
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-                var handler = new SocketsHttpHandler
+                try
                 {
-                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    EnableMultipleHttp2Connections = true
-                };
-
-                var channel = GrpcChannel.ForAddress("http://10.0.0.221:5001", new GrpcChannelOptions
+                    var client = new Client();
+                    await client.ReceiveAndPlayData();
+                }
+                catch (Exception) 
                 {
-                    HttpHandler = handler
-                });
-                var client = new AudioStream.AudioStreamClient(channel);
-                var format = client.GetFormat(new Empty());
-                var audioStream = client.GetStream(new Empty(), null, DateTime.UtcNow.AddHours(5));
-
-                using var audioPlayer = new AudioPlayer(format.ToWaveFormat());
-                audioPlayer.Play();
-
-                await foreach (var sample in audioStream.ResponseStream.ReadAllAsync())
-                {
-                    audioPlayer.AddSample(sample.Data.ToByteArray());
+                    await Task.Delay(60 * 1000);
                 }
             }
-            catch (Exception ex) { }
         }
     }
 }

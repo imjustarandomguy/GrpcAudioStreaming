@@ -2,7 +2,7 @@ using NAudio.Wave;
 
 namespace GrpcAudioStreaming.Server
 {
-    public static class Extensions
+    public static class WaveFormatExtensions
     {
         public static AudioFormat ToAudioFormat(this WaveFormat waveFormat)
         {

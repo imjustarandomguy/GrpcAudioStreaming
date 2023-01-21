@@ -32,7 +32,7 @@ namespace GrpcAudioStreaming.Client
             });
             var client = new AudioStream.AudioStreamClient(channel);
             var format = client.GetFormat(new Empty());
-            _audioStream = client.GetStream(new Empty(), null, DateTime.UtcNow.AddHours(5));
+            _audioStream = client.GetStream(new Empty());
 
             _audioPlayer = new AudioPlayer(format.ToWaveFormat());
             _audioPlayer.Play();

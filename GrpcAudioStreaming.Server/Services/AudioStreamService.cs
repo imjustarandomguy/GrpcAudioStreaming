@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using NAudio.Wave;
 using System;
 using System.Threading.Tasks;
 
@@ -35,7 +36,8 @@ namespace GrpcAudioStreaming.Server.Services
 
         public override Task<AudioFormat> GetFormat(Empty request, ServerCallContext context)
         {
-            return Task.FromResult(_audioSampleSource.AudioFormat);
+            //return Task.FromResult(_audioSampleSource.AudioFormat);
+            return Task.FromResult(new WaveFormat(44100, 16, 2).ToAudioFormat());
         }
     }
 }

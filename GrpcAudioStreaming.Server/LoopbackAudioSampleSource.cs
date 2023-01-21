@@ -1,3 +1,5 @@
+using AudioSharer;
+using AudioSharer.Models;
 using Google.Protobuf;
 using NAudio.Wave;
 using System;
@@ -10,65 +12,45 @@ namespace GrpcAudioStreaming.Server
     {
         public event EventHandler<AudioSample> AudioSampleCreated;
 
-        private readonly WasapiLoopbackCapture _capture;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly AudioStreamerService _audioStreamer;
+        private readonly string consumerId;
 
         public AudioFormat AudioFormat { get; }
 
-        public LoopbackAudioSampleSource()
+        public LoopbackAudioSampleSource(AudioStreamerService audioStreamer)
         {
-            _capture = new WasapiLoopbackCapture
-            {
-                WaveFormat = new WaveFormat(44100, 16, 2)
-            };
-            AudioFormat = _capture.WaveFormat.ToAudioFormat();
+            consumerId = Guid.NewGuid().ToString();
+
+            _audioStreamer = audioStreamer;
             _cancellationTokenSource = new CancellationTokenSource();
+            AudioFormat = new WaveFormat(44100, 16, 2).ToAudioFormat();
         }
 
         public Task StartStreaming()
         {
-            return Stream(_capture, _cancellationTokenSource.Token);
+            _audioStreamer.RegisterNewConsumer(new Consumer { Id = consumerId });
+            return Stream(_cancellationTokenSource.Token);
         }
 
         public void StopStreaming()
         {
+            _audioStreamer.UnregisterConsumer(consumerId);
             _cancellationTokenSource.Cancel();
         }
 
-        private async Task Stream(WasapiLoopbackCapture stream, CancellationToken cancellationToken)
+        private async Task Stream(CancellationToken cancellationToken)
         {
-            stream.DataAvailable += OnDataAvailable;
-
-            stream.RecordingStopped += OnRecordingStop;
-
-            stream.StartRecording();
-
-            try
+            await foreach (var node in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
             {
-                await Task.Delay(-1, cancellationToken);
+                var audioSample = new AudioSample
+                {
+                    Timestamp = DateTime.Now.ToString("o"),
+                    Data = ByteString.CopyFrom(node.Data),
+                };
+
+                OnAudioSampleCreated(audioSample);
             }
-            catch (TaskCanceledException)
-            {
-                stream.StopRecording();
-            }
-        }
-
-        private void OnDataAvailable(object sender, WaveInEventArgs e)
-        {
-            var data = e.Buffer;
-
-            var audioSample = new AudioSample
-            {
-                Timestamp = DateTime.Now.ToString("o"),
-                Data = ByteString.CopyFrom(data),
-            };
-
-            OnAudioSampleCreated(audioSample);
-        }
-
-        private void OnRecordingStop(object sender, StoppedEventArgs e)
-        {
-            _capture.Dispose();
         }
 
         protected virtual void OnAudioSampleCreated(AudioSample audioSample)
@@ -78,7 +60,7 @@ namespace GrpcAudioStreaming.Server
 
         public void Dispose()
         {
-            _capture.Dispose();
+            _audioStreamer.Dispose();
         }
     }
 }

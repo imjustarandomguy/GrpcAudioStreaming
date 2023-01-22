@@ -1,4 +1,5 @@
 ﻿using GrpcAudioStreaming.Server.Services;
+using GrpcAudioStreaming.Server.Sources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,8 +15,8 @@ namespace GrpcAudioStreaming.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddSingleton<IAudioSampleSource>(new LoopbackAudioSampleSource());
-            //services.AddSingleton<IAudioSampleSource>(new AudioSampleSource(@"C:\Users\random\Downloads\asd.wav"));
+            services.AddSingleton<AudioStreamerService>();
+            services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

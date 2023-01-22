@@ -9,6 +9,8 @@ namespace GrpcAudioStreaming.Client
 
         public CustomApplicationContext()
         {
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+
             _trayIcon = new NotifyIcon
             {
                 Icon = new System.Drawing.Icon("icon.ico"),
@@ -23,6 +25,11 @@ namespace GrpcAudioStreaming.Client
         {
             _trayIcon.Visible = false;
             Environment.Exit(1);
+        }
+
+        private void OnProcessExit(object sender, EventArgs e)
+        {
+            _trayIcon.Dispose();
         }
     }
 }

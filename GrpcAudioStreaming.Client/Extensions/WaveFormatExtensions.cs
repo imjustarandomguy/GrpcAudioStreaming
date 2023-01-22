@@ -1,7 +1,7 @@
 using System;
 using NAudio.Wave;
 
-namespace GrpcAudioStreaming.Client
+namespace GrpcAudioStreaming.Client.Extensions
 {
     public static class WaveFormatExtensions
     {

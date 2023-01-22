@@ -1,20 +1,22 @@
+using Google.Protobuf;
+using GrpcAudioStreaming.Server.Extensions;
+using NAudio.Wave;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
-using NAudio.Wave;
 
-namespace GrpcAudioStreaming.Server
+namespace GrpcAudioStreaming.Server.Sources
 {
-    public class AudioSampleSource : IAudioSampleSource, IDisposable
+    public class WaveAudioSampleSource : IAudioSampleSource, IDisposable
     {
         public event EventHandler<AudioSample> AudioSampleCreated;
+
         private readonly WaveFileReader _waveFileReader;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
         public AudioFormat AudioFormat { get; }
 
-        public AudioSampleSource(string file)
+        public WaveAudioSampleSource(string file)
         {
             _waveFileReader = new WaveFileReader(file);
             AudioFormat = _waveFileReader.WaveFormat.ToAudioFormat();
@@ -43,7 +45,6 @@ namespace GrpcAudioStreaming.Server
 
                 if (bytesRead == 0)
                 {
-                    // if we have reached the end, reset stream to start
                     stream.CurrentTime = TimeSpan.Zero;
                     streamTimeStart = stream.CurrentTime;
                     realTimeStart = DateTime.UtcNow;
@@ -73,6 +74,7 @@ namespace GrpcAudioStreaming.Server
         public void Dispose()
         {
             _waveFileReader.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

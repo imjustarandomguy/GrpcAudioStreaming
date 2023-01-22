@@ -1,6 +1,5 @@
-using System;
-using System.Diagnostics;
 using NAudio.Wave;
+using System;
 
 namespace GrpcAudioStreaming.Client
 {
@@ -11,21 +10,23 @@ namespace GrpcAudioStreaming.Client
 
         public AudioPlayer(WaveFormat waveFormat)
         {
-            _wavePlayer = new WaveOutEvent();
-            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) {BufferDuration = TimeSpan.FromMilliseconds(50)};
+            _wavePlayer = new WaveOutEvent
+            {
+                DesiredLatency = 100,
+            };
+
+            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat)
+            {
+                BufferDuration = TimeSpan.FromSeconds(1),
+                DiscardOnBufferOverflow = true,
+            };
+
             _wavePlayer.Init(_bufferedWaveProvider);
         }
 
         public void AddSample(byte[] sample)
         {
-            try
-            {
-                _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"Adding samples failed: {ex}");
-            }
+            _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
         }
 
         public void Play()
@@ -42,6 +43,7 @@ namespace GrpcAudioStreaming.Client
         {
             _wavePlayer.Stop();
             _wavePlayer.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

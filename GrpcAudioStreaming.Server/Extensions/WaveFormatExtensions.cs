@@ -1,6 +1,6 @@
 using NAudio.Wave;
 
-namespace GrpcAudioStreaming.Server
+namespace GrpcAudioStreaming.Server.Extensions
 {
     public static class WaveFormatExtensions
     {

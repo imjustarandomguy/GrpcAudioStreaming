@@ -6,9 +6,12 @@ namespace GrpcAudioStreaming.Client
     public class CustomApplicationContext : ApplicationContext
     {
         private readonly NotifyIcon _trayIcon;
+        private readonly AudioPlayer _audioPlayer;
 
-        public CustomApplicationContext()
+        public CustomApplicationContext(AudioPlayer audioPlayer)
         {
+            _audioPlayer = audioPlayer;
+
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
             _trayIcon = new NotifyIcon
@@ -18,13 +21,28 @@ namespace GrpcAudioStreaming.Client
             };
 
             _trayIcon.ContextMenuStrip = new ContextMenuStrip();
+            _trayIcon.ContextMenuStrip.Items.Add("Play/Stop", null, TogglePlayStop);
             _trayIcon.ContextMenuStrip.Items.Add("Exit", null, ExitApplication);
         }
 
         private void ExitApplication(object sender, EventArgs e)
         {
             _trayIcon.Visible = false;
-            Environment.Exit(1);
+            Environment.Exit(0);
+        }
+
+        private void TogglePlayStop(object sender, EventArgs e)
+        {
+            if (!_audioPlayer.Initilized) return;
+
+            if (_audioPlayer.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+            {
+                _audioPlayer.Stop();
+            }
+            else
+            {
+                _audioPlayer.Play();
+            }
         }
 
         private void OnProcessExit(object sender, EventArgs e)

@@ -1,27 +1,33 @@
+using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
 
 namespace GrpcAudioStreaming.Client
 {
-    public class AudioPlayer : IDisposable
+    public class AudioPlayer : WaveOutEvent
     {
-        private readonly IWavePlayer _wavePlayer;
-        private readonly BufferedWaveProvider _bufferedWaveProvider;
+        private readonly AppSettings _appSettings;
+        private BufferedWaveProvider _bufferedWaveProvider;
 
-        public AudioPlayer(WaveFormat waveFormat)
+        public bool Initilized { get; private set; }
+
+        public AudioPlayer(IOptions<AppSettings> appSettings)
         {
-            _wavePlayer = new WaveOutEvent
-            {
-                DesiredLatency = 100,
-            };
+            _appSettings = appSettings.Value;
+            DesiredLatency = _appSettings.PlayerDesiredLatency;
+        }
 
+        public void Init(WaveFormat waveFormat)
+        {
             _bufferedWaveProvider = new BufferedWaveProvider(waveFormat)
             {
-                BufferDuration = TimeSpan.FromSeconds(1),
-                DiscardOnBufferOverflow = true,
+                BufferDuration = TimeSpan.FromMilliseconds(_appSettings.BufferDuration),
+                DiscardOnBufferOverflow = _appSettings.DiscardOnBufferOverflow,
             };
 
-            _wavePlayer.Init(_bufferedWaveProvider);
+            Init(_bufferedWaveProvider);
+
+            Initilized = true;
         }
 
         public void AddSample(byte[] sample)
@@ -29,21 +35,16 @@ namespace GrpcAudioStreaming.Client
             _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
         }
 
-        public void Play()
+        public new virtual void Play()
         {
-            _wavePlayer.Play();
+            _bufferedWaveProvider.ClearBuffer();
+            base.Play();
         }
 
-        public void Stop()
+        public new virtual void Stop()
         {
-            _wavePlayer.Stop();
-        }
-
-        public void Dispose()
-        {
-            _wavePlayer.Stop();
-            _wavePlayer.Dispose();
-            GC.SuppressFinalize(this);
+            base.Stop();
+            _bufferedWaveProvider.ClearBuffer();
         }
     }
 }

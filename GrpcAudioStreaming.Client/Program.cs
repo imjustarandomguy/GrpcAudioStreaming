@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,15 +12,18 @@ namespace GrpcAudioStreaming.Client
     {
         private static async Task Main(string[] args)
         {
-            new Thread(delegate ()
-            {
-                Application.Run(new CustomApplicationContext());
-            }).Start();
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
 
             using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            new Thread(delegate ()
+            {
+                Application.Run(serviceProvider.GetService<CustomApplicationContext>());
+            }).Start();
+
             await serviceProvider.GetService<App>().Run(args);
         }
 
@@ -36,6 +40,9 @@ namespace GrpcAudioStreaming.Client
             services.Configure<AppSettings>(configuration.GetSection("App"));
 
             services.AddTransient<App>();
+            services.AddScoped<AudioPlayer>();
+            services.AddSingleton<Client>();
+            services.AddSingleton<CustomApplicationContext>();
         }
     }
 }

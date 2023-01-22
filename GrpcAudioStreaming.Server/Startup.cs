@@ -1,10 +1,13 @@
 ﻿using GrpcAudioStreaming.Server.Services;
+using GrpcAudioStreaming.Server.Settings;
 using GrpcAudioStreaming.Server.Sources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace GrpcAudioStreaming.Server
 {
@@ -14,6 +17,14 @@ namespace GrpcAudioStreaming.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            services.Configure<AudioSettings>(configuration.GetSection(AudioSettings.ROOT_PATH));
+
             services.AddGrpc();
             services.AddSingleton<AudioStreamerService>();
             services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();

@@ -1,8 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using GrpcAudioStreaming.Server.Extensions;
 using GrpcAudioStreaming.Server.Sources;
-using NAudio.Wave;
 using System;
 using System.Threading.Tasks;
 
@@ -18,28 +16,28 @@ namespace GrpcAudioStreaming.Server.Services
             _audioSampleSource = audioSampleSource;
         }
 
-        public override Task GetStream(Empty request, IServerStreamWriter<AudioSample> responseStream,
-            ServerCallContext context)
+        public override Task GetStream(Empty request, IServerStreamWriter<AudioSample> responseStream, ServerCallContext context)
         {
             _responseStream = responseStream;
-            _audioSampleSource.AudioSampleCreated += async (_, audioSample) =>
-            {
-                try
-                {
-                    await _responseStream.WriteAsync(audioSample);
-                }
-                catch (Exception)
-                {
-                    _audioSampleSource.StopStreaming();
-                }
-            };
+            _audioSampleSource.AudioSampleCreated += OnAudioSampleCreated;
             return _audioSampleSource.StartStreaming();
         }
 
         public override Task<AudioFormat> GetFormat(Empty request, ServerCallContext context)
         {
-            //return Task.FromResult(_audioSampleSource.AudioFormat);
-            return Task.FromResult(new WaveFormat(44100, 16, 2).ToAudioFormat());
+            return Task.FromResult(_audioSampleSource.AudioFormat);
+        }
+
+        private async void OnAudioSampleCreated(object sender, AudioSample audioSample)
+        {
+            try
+            {
+                await _responseStream.WriteAsync(audioSample);
+            }
+            catch (Exception)
+            {
+                _audioSampleSource.StopStreaming();
+            }
         }
     }
 }

@@ -2,7 +2,6 @@ using Google.Protobuf;
 using GrpcAudioStreaming.Server.Extensions;
 using GrpcAudioStreaming.Server.Models;
 using GrpcAudioStreaming.Server.Services;
-using NAudio.Wave;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,12 +24,12 @@ namespace GrpcAudioStreaming.Server.Sources
 
             _audioStreamer = audioStreamer;
             _cancellationTokenSource = new CancellationTokenSource();
-            AudioFormat = new WaveFormat(44100, 16, 2).ToAudioFormat();
+            AudioFormat = _audioStreamer.WaveFormat.ToAudioFormat();
         }
 
         public Task StartStreaming()
         {
-            _audioStreamer.RegisterNewConsumer(new Consumer { Id = consumerId });
+            _audioStreamer.RegisterNewConsumer(new LoopbackAudioConsumer { Id = consumerId });
             return Stream(_cancellationTokenSource.Token);
         }
 

@@ -1,5 +1,7 @@
 ﻿using GrpcAudioStreaming.Server.Models;
+using GrpcAudioStreaming.Server.Settings;
 using GrpcAudioStreaming.Server.Utils;
+using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -7,17 +9,22 @@ using System.Linq;
 
 namespace GrpcAudioStreaming.Server.Services
 {
-    public class AudioStreamerService
+    public class AudioStreamerService : IDisposable
     {
+        private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
 
-        public Dictionary<string, Consumer> Consumers { get; private set; } = new Dictionary<string, Consumer>();
-
+        public Dictionary<string, LoopbackAudioConsumer> Consumers { get; private set; } = new Dictionary<string, LoopbackAudioConsumer>();
         public AsyncEnumerableSource<byte[]> Source { get; private set; } = new AsyncEnumerableSource<byte[]>();
-
         public WaveFormat WaveFormat { get; private set; } = null!;
 
-        public void RegisterNewConsumer(Consumer consumer)
+        public AudioStreamerService(IOptions<AudioSettings> audioSettings)
+        {
+            _audioSettings = audioSettings.Value;
+            WaveFormat = new WaveFormat(_audioSettings.SampleRate, _audioSettings.BitsPerSample, _audioSettings.Channels);
+        }
+
+        public void RegisterNewConsumer(LoopbackAudioConsumer consumer)
         {
             if (string.IsNullOrEmpty(consumer.Id)) return;
 
@@ -49,19 +56,16 @@ namespace GrpcAudioStreaming.Server.Services
 
         public void Dispose()
         {
-            Consumers = new Dictionary<string, Consumer>();
+            Consumers = new Dictionary<string, LoopbackAudioConsumer>();
             _capture?.StopRecording();
+            GC.SuppressFinalize(this);
         }
 
         private void InitiateRecording()
         {
-            _capture = new WasapiLoopbackCapture
-            {
-                WaveFormat = new WaveFormat(44100, 16, 2)
-            };
-
             Source = new AsyncEnumerableSource<byte[]>();
-            WaveFormat = _capture.WaveFormat;
+
+            _capture = new WasapiLoopbackCapture { WaveFormat = WaveFormat };
 
             _capture.DataAvailable += OnDataAvailable;
 

@@ -16,6 +16,7 @@ namespace AudioSharer.Utils
         {
             var channel = Channel.CreateUnbounded<T>();
             ImmutableInterlocked.Update(ref _channels, (x, y) => Tuple.Create(x.Item1.Add(y)), channel);
+
             try
             {
                 await foreach (var item in channel.Reader.ReadAllAsync().ConfigureAwait(false))

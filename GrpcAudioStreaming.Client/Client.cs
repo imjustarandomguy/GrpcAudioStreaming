@@ -28,14 +28,13 @@ namespace GrpcAudioStreaming.Client
 
             var channel = GrpcChannel.ForAddress("http://10.0.0.221:5001", new GrpcChannelOptions
             {
-                HttpHandler = handler
+                //HttpHandler = handler
             });
             var client = new AudioStream.AudioStreamClient(channel);
             var format = client.GetFormat(new Empty());
-            _audioStream = client.GetStream(new Empty(), null, DateTime.UtcNow.AddHours(5));
+            _audioStream = client.GetStream(new Empty());
 
             _audioPlayer = new AudioPlayer(format.ToWaveFormat());
-            _audioPlayer.Play();
         }
 
         public async Task ReceiveAndPlayData()
@@ -51,5 +50,12 @@ namespace GrpcAudioStreaming.Client
             _audioStream?.Dispose();
             _audioPlayer?.Dispose();
         }
+    }
+
+    public class ModelTest
+    {
+        public string Timestamp { get; set; }
+
+        public string Data { get; set; }
     }
 }

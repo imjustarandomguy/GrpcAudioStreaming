@@ -13,7 +13,7 @@ namespace AudioSharer
 
         public Dictionary<string, Consumer> Consumers { get; private set; } = new Dictionary<string, Consumer>();
 
-        public AsyncEnumerableSource<AudioNode> Source { get; private set; } = new AsyncEnumerableSource<AudioNode>();
+        public AsyncEnumerableSource<byte[]> Source { get; private set; } = new AsyncEnumerableSource<byte[]>();
 
         public WaveFormat WaveFormat { get; private set; } = null!;
 
@@ -60,7 +60,7 @@ namespace AudioSharer
                 WaveFormat = new WaveFormat(44100, 16, 2)
             };
 
-            Source = new AsyncEnumerableSource<AudioNode>();
+            Source = new AsyncEnumerableSource<byte[]>();
             WaveFormat = _capture.WaveFormat;
 
             _capture.DataAvailable += OnDataAvailable;
@@ -72,12 +72,7 @@ namespace AudioSharer
 
         private void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-            var node = new AudioNode
-            {
-                Data = e.Buffer,
-            };
-
-            Source.YieldReturn(node);
+            Source.YieldReturn(e.Buffer.Take(e.BytesRecorded).ToArray());
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)

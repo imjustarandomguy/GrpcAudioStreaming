@@ -41,12 +41,12 @@ namespace GrpcAudioStreaming.Server
 
         private async Task Stream(CancellationToken cancellationToken)
         {
-            await foreach (var node in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
+            await foreach (var data in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
             {
                 var audioSample = new AudioSample
                 {
                     Timestamp = DateTime.Now.ToString("o"),
-                    Data = ByteString.CopyFrom(node.Data),
+                    Data = ByteString.CopyFrom(data),
                 };
 
                 OnAudioSampleCreated(audioSample);

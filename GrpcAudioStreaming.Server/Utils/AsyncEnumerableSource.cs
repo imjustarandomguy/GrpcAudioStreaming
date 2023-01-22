@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace AudioSharer.Utils
+namespace GrpcAudioStreaming.Server.Utils
 {
     public class AsyncEnumerableSource<T>
     {

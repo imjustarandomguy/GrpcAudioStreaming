@@ -9,7 +9,6 @@
     <ItemGroup>
       <PackageReference Include="Grpc.Net.Client" Version="2.51.0" />
       <PackageReference Include="NAudio" Version="2.1.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>

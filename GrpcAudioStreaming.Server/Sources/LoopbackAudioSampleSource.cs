@@ -1,12 +1,13 @@
-using AudioSharer;
-using AudioSharer.Models;
 using Google.Protobuf;
+using GrpcAudioStreaming.Server.Extensions;
+using GrpcAudioStreaming.Server.Models;
+using GrpcAudioStreaming.Server.Services;
 using NAudio.Wave;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Server
+namespace GrpcAudioStreaming.Server.Sources
 {
     public class LoopbackAudioSampleSource : IAudioSampleSource, IDisposable
     {
@@ -43,13 +44,11 @@ namespace GrpcAudioStreaming.Server
         {
             await foreach (var data in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
             {
-                var audioSample = new AudioSample
+                OnAudioSampleCreated(new AudioSample
                 {
                     Timestamp = DateTime.Now.ToString("o"),
                     Data = ByteString.CopyFrom(data),
-                };
-
-                OnAudioSampleCreated(audioSample);
+                });
             }
         }
 
@@ -61,6 +60,7 @@ namespace GrpcAudioStreaming.Server
         public void Dispose()
         {
             _audioStreamer.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

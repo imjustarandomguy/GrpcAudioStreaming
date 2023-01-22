@@ -1,5 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcAudioStreaming.Server.Extensions;
+using GrpcAudioStreaming.Server.Sources;
 using NAudio.Wave;
 using System;
 using System.Threading.Tasks;

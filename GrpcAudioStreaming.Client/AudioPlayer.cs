@@ -15,8 +15,8 @@ namespace GrpcAudioStreaming.Client
                 DesiredLatency = 100,
             };
 
-            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) 
-            { 
+            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat)
+            {
                 BufferDuration = TimeSpan.FromSeconds(1),
                 DiscardOnBufferOverflow = true,
             };
@@ -43,6 +43,7 @@ namespace GrpcAudioStreaming.Client
         {
             _wavePlayer.Stop();
             _wavePlayer.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

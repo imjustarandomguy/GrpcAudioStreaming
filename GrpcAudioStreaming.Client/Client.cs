@@ -1,7 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
-using NAudio.Wave;
+using GrpcAudioStreaming.Client.Extensions;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -52,6 +52,7 @@ namespace GrpcAudioStreaming.Client
         {
             _audioStream?.Dispose();
             _audioPlayer?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

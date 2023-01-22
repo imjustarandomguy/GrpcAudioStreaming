@@ -1,11 +1,11 @@
-﻿using AudioSharer.Models;
-using AudioSharer.Utils;
+﻿using GrpcAudioStreaming.Server.Models;
+using GrpcAudioStreaming.Server.Utils;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AudioSharer
+namespace GrpcAudioStreaming.Server.Services
 {
     public class AudioStreamerService
     {
@@ -32,7 +32,7 @@ namespace AudioSharer
             }
         }
 
-        public void UnregisterConsumer(string? consumerId)
+        public void UnregisterConsumer(string consumerId)
         {
             if (string.IsNullOrEmpty(consumerId)) return;
 

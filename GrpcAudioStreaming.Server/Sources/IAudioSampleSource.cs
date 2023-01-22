@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Server
+namespace GrpcAudioStreaming.Server.Sources
 {
     public interface IAudioSampleSource
     {
@@ -10,6 +10,7 @@ namespace GrpcAudioStreaming.Server
         AudioFormat AudioFormat { get; }
 
         Task StartStreaming();
+
         void StopStreaming();
     }
 }

@@ -4,7 +4,20 @@
         <OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationIcon>icon.ico</ApplicationIcon>
+		<PackageIcon>icon.ico</PackageIcon>
 	</PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="icon.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="bin\Release\netcoreapp6.0\icon.ico">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Grpc.Net.Client" Version="2.51.0" />

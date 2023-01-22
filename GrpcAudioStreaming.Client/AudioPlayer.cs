@@ -35,13 +35,13 @@ namespace GrpcAudioStreaming.Client
             _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
         }
 
-        public new virtual void Play()
+        public virtual new void Play()
         {
             _bufferedWaveProvider.ClearBuffer();
             base.Play();
         }
 
-        public new virtual void Stop()
+        public virtual new void Stop()
         {
             base.Stop();
             _bufferedWaveProvider.ClearBuffer();

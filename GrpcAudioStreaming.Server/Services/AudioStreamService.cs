@@ -22,7 +22,7 @@ namespace GrpcAudioStreaming.Server.Services
             ServerCallContext context)
         {
             _responseStream = responseStream;
-            _audioSampleSource.AudioSampleCreated += async (_, audioSample) => 
+            _audioSampleSource.AudioSampleCreated += async (_, audioSample) =>
             {
                 try
                 {

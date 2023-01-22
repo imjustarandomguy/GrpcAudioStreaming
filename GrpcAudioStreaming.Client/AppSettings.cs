@@ -13,5 +13,7 @@
         public bool AttemptAutomaticReconnect { get; set; }
 
         public int AutomaticReconnectDelay { get; set; }
+
+        public float Volume { get; set; }
     }
 }

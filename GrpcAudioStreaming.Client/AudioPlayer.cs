@@ -15,6 +15,7 @@ namespace GrpcAudioStreaming.Client
         {
             _appSettings = appSettings.Value;
             DesiredLatency = _appSettings.PlayerDesiredLatency;
+            Volume = _appSettings.Volume;
         }
 
         public void Init(WaveFormat waveFormat)

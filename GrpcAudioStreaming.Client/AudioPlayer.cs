@@ -14,21 +14,19 @@ namespace GrpcAudioStreaming.Client
             {
                 DesiredLatency = 100,
             };
-            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) { BufferDuration = TimeSpan.FromSeconds(1) };
+
+            _bufferedWaveProvider = new BufferedWaveProvider(waveFormat) 
+            { 
+                BufferDuration = TimeSpan.FromSeconds(1),
+                DiscardOnBufferOverflow = true,
+            };
+
             _wavePlayer.Init(_bufferedWaveProvider);
         }
 
         public void AddSample(byte[] sample)
         {
             _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
-
-            if (_bufferedWaveProvider.BufferedDuration.TotalMilliseconds > 250)
-            {
-                if (_wavePlayer.PlaybackState != PlaybackState.Playing)
-                {
-                    _wavePlayer.Play();
-                }
-            }
         }
 
         public void Play()

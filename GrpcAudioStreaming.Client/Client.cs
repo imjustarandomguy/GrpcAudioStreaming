@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using NAudio.Wave;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -32,9 +33,11 @@ namespace GrpcAudioStreaming.Client
             });
             var client = new AudioStream.AudioStreamClient(channel);
             var format = client.GetFormat(new Empty());
-            _audioStream = client.GetStream(new Empty());
 
             _audioPlayer = new AudioPlayer(format.ToWaveFormat());
+            _audioPlayer.Play();
+
+            _audioStream = client.GetStream(new Empty());
         }
 
         public async Task ReceiveAndPlayData()
@@ -50,12 +53,5 @@ namespace GrpcAudioStreaming.Client
             _audioStream?.Dispose();
             _audioPlayer?.Dispose();
         }
-    }
-
-    public class ModelTest
-    {
-        public string Timestamp { get; set; }
-
-        public string Data { get; set; }
     }
 }

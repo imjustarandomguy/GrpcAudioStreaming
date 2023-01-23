@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp7.0</TargetFramework>
 	  <ApplicationIcon>icon.ico</ApplicationIcon>
     <PackageIcon>icon.ico</PackageIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

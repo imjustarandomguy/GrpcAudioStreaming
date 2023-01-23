@@ -26,7 +26,7 @@ namespace GrpcAudioStreaming.Server
             services.Configure<AudioSettings>(configuration.GetSection(AudioSettings.ROOT_PATH));
 
             services.AddGrpc();
-            services.AddSingleton<AudioStreamerService>();
+            services.AddSingleton<LoopbackAudioStreamerService>();
             services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
         }
 

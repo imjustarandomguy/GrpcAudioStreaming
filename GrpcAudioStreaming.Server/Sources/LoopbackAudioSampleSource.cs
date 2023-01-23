@@ -13,12 +13,12 @@ namespace GrpcAudioStreaming.Server.Sources
         public event EventHandler<AudioSample> AudioSampleCreated;
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly AudioStreamerService _audioStreamer;
+        private readonly LoopbackAudioStreamerService _audioStreamer;
         private readonly string consumerId;
 
         public AudioFormat AudioFormat { get; }
 
-        public LoopbackAudioSampleSource(AudioStreamerService audioStreamer)
+        public LoopbackAudioSampleSource(LoopbackAudioStreamerService audioStreamer)
         {
             consumerId = Guid.NewGuid().ToString();
 

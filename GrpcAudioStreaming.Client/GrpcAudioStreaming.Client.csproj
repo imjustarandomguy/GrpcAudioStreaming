@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<PackageIcon>icon.ico</PackageIcon>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="bin\Release\netcoreapp6.0\icon.ico">
+      <None Include="icon.ico">
         <Pack>True</Pack>
         <PackagePath>\</PackagePath>
       </None>

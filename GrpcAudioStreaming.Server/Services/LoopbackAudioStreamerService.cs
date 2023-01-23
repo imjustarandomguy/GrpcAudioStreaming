@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace GrpcAudioStreaming.Server.Services
 {
-    public class AudioStreamerService : IDisposable
+    public class LoopbackAudioStreamerService : IDisposable
     {
         private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
@@ -18,7 +18,7 @@ namespace GrpcAudioStreaming.Server.Services
         public AsyncEnumerableSource<byte[]> Source { get; private set; } = new AsyncEnumerableSource<byte[]>();
         public WaveFormat WaveFormat { get; private set; } = null!;
 
-        public AudioStreamerService(IOptions<AudioSettings> audioSettings)
+        public LoopbackAudioStreamerService(IOptions<AudioSettings> audioSettings)
         {
             _audioSettings = audioSettings.Value;
             WaveFormat = new WaveFormat(_audioSettings.SampleRate, _audioSettings.BitsPerSample, _audioSettings.Channels);

@@ -76,7 +76,7 @@ namespace GrpcAudioStreaming.Server.Services
 
         private void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-            Source.YieldReturn(e.Buffer.Take(e.BytesRecorded).ToArray());
+            Source.YieldReturn(e.Buffer[..e.BytesRecorded]);
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)

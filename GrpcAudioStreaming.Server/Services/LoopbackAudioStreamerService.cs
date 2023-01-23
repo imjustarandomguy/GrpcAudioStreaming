@@ -5,17 +5,16 @@ using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace GrpcAudioStreaming.Server.Services
 {
-    public class LoopbackAudioStreamerService : IDisposable
+    public partial class LoopbackAudioStreamerService : IDisposable
     {
         private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
 
         public Dictionary<string, LoopbackAudioConsumer> Consumers { get; private set; } = new Dictionary<string, LoopbackAudioConsumer>();
-        public AsyncEnumerableSource<byte[]> Source { get; private set; } = new AsyncEnumerableSource<byte[]>();
+        public AsyncEnumerableSource<Memory<byte>> Source { get; private set; } = new AsyncEnumerableSource<Memory<byte>>();
         public WaveFormat WaveFormat { get; private set; } = null!;
 
         public LoopbackAudioStreamerService(IOptions<AudioSettings> audioSettings)
@@ -63,7 +62,7 @@ namespace GrpcAudioStreaming.Server.Services
 
         private void InitiateRecording()
         {
-            Source = new AsyncEnumerableSource<byte[]>();
+            Source = new AsyncEnumerableSource<Memory<byte>>();
 
             _capture = new WasapiLoopbackCapture { WaveFormat = WaveFormat };
 
@@ -76,7 +75,7 @@ namespace GrpcAudioStreaming.Server.Services
 
         private void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-            Source.YieldReturn(e.Buffer.Take(e.BytesRecorded).ToArray());
+            Source.YieldReturn(e.Buffer[..e.BytesRecorded].AsMemory());
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)

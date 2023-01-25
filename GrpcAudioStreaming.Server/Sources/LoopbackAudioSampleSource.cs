@@ -46,7 +46,7 @@ namespace GrpcAudioStreaming.Server.Sources
                 OnAudioSampleCreated(new AudioSample
                 {
                     Timestamp = DateTime.Now.ToString("o"),
-                    Data = ByteString.CopyFrom(data.Span),
+                    Data = UnsafeByteOperations.UnsafeWrap(data),
                 });
             }
         }

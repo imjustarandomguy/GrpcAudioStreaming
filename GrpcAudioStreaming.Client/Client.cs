@@ -57,6 +57,14 @@ namespace GrpcAudioStreaming.Client
         {
             await foreach (var sample in _audioStream.ResponseStream.ReadAllAsync(_cancellationTokenSource.Token))
             {
+                //var succes = MemoryMarshal.TryGetArray(sample.Data.Memory, out var segment);
+
+                //var content = succes
+                //    ? new ByteArrayContent(segment.Array, segment.Offset, segment.Count)
+                //    : new ByteArrayContent(sample.Data.ToByteArray());
+
+                //_audioPlayer.AddSample(await content.ReadAsByteArrayAsync());
+
                 _audioPlayer.AddSample(sample.Data.ToByteArray());
             }
         }

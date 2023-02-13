@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,15 @@ namespace GrpcAudioStreaming.Client
                 Application.Run(serviceProvider.GetService<CustomApplicationContext>());
             }).Start();
 
+            SetHighPriority();
+
             await serviceProvider.GetService<App>().Run(args);
+        }
+
+        private static void SetHighPriority()
+        {
+            using Process p = Process.GetCurrentProcess();
+            p.PriorityClass = ProcessPriorityClass.High;
         }
 
         private static void ConfigureServices(IServiceCollection services)

@@ -6,6 +6,9 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<PackageIcon>icon.ico</PackageIcon>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<PublishSingleFile>true</PublishSingleFile>
+		<PublishReadyToRun>true</PublishReadyToRun>
 	</PropertyGroup>
 
     <ItemGroup>

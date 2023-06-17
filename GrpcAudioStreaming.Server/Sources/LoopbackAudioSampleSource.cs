@@ -49,6 +49,27 @@ namespace GrpcAudioStreaming.Server.Sources
                     Data = UnsafeByteOperations.UnsafeWrap(data),
                 });
             }
+
+            //var bytePool = ArrayPool<byte>.Shared;
+
+            //await foreach (var data in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
+            //{
+            //    // Rent a byte array from the pool
+            //    var byteArray = bytePool.Rent(data.Length);
+
+            //    // Copy the data to the rented byte array
+            //    data.Span.CopyTo(byteArray);
+
+            //    // Create the AudioSample with the ByteString
+            //    OnAudioSampleCreated(new AudioSample
+            //    {
+            //        Timestamp = DateTime.Now.ToString("o"),
+            //        Data = ByteString.CopyFrom(byteArray, 0, data.Length),
+            //    });
+
+            //    // Return the rented byte array to the pool
+            //    bytePool.Return(byteArray);
+            //}
         }
 
         protected virtual void OnAudioSampleCreated(AudioSample audioSample)

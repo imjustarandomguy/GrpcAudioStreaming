@@ -10,6 +10,7 @@ namespace GrpcAudioStreaming.Server.Services
 {
     public partial class LoopbackAudioStreamerService : IDisposable
     {
+        private Memory<byte> _buffer = new byte[1024];
         private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
 
@@ -75,13 +76,21 @@ namespace GrpcAudioStreaming.Server.Services
 
         private void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-            Source.YieldReturn(e.Buffer.AsMemory()[..e.BytesRecorded]);
+            if (_buffer.Length < e.BytesRecorded)
+            {
+                _buffer = new byte[e.BytesRecorded];
+            }
+
+            e.Buffer.AsMemory()[..e.BytesRecorded].CopyTo(_buffer);
+
+            Source.YieldReturn(_buffer[..e.BytesRecorded]);
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)
         {
             _capture.Dispose();
             Source.Complete();
+            _capture = null;
         }
     }
 }

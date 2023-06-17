@@ -2,7 +2,7 @@
 {
     public class AudioSettings
     {
-        public const string ROOT_PATH = "AudioSettings";
+        public const string RootPath = "AudioSettings";
 
         public int SampleRate { get; set; } = 44100;
 

@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp7.0</TargetFramework>
 	<ApplicationIcon>icon.ico</ApplicationIcon>
     <PackageIcon>icon.ico</PackageIcon>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	<PublishSingleFile>true</PublishSingleFile>
 	<PublishReadyToRun>true</PublishReadyToRun>

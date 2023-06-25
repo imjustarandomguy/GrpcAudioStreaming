@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
-          release_name="Client-$tag-${{ matrix.target }}"
+          release_name="GrpcAudioStreamingClient-$tag"
 
           # Build everything
           dotnet publish GrpcAudioStreaming.Client/GrpcAudioStreaming.Client.csproj --no-self-contained -c Release --runtime "${{ matrix.target }}" -o "$release_name"

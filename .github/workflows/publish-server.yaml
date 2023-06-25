@@ -47,6 +47,6 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Client*"
+          files: "GrpcAudioStreamingServer*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

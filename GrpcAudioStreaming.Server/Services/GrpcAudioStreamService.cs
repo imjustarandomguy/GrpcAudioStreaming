@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Server.Services
 {
-    public class AudioStreamService : AudioStream.AudioStreamBase
+    public class GrpcAudioStreamService : AudioStream.AudioStreamBase
     {
         private readonly IAudioSampleSource _audioSampleSource;
         private IServerStreamWriter<AudioSample> _responseStream;
 
-        public AudioStreamService(IAudioSampleSource audioSampleSource)
+        public GrpcAudioStreamService(IAudioSampleSource audioSampleSource)
         {
             _audioSampleSource = audioSampleSource;
         }

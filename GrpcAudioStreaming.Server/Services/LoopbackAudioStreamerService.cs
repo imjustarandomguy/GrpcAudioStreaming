@@ -28,7 +28,7 @@ namespace GrpcAudioStreaming.Server.Services
         {
             if (string.IsNullOrEmpty(consumer.Id)) return;
 
-            Console.WriteLine($"Registering new consumer {consumer.Id}");
+            Console.WriteLine($"Registering new consumer: {consumer.Id}");
 
             Consumers.Add(consumer.Id, consumer);
 
@@ -43,7 +43,7 @@ namespace GrpcAudioStreaming.Server.Services
         {
             if (string.IsNullOrEmpty(consumerId)) return;
 
-            Console.WriteLine($"Unregistering new consumer {consumerId}");
+            Console.WriteLine($"Unregistering consumer: {consumerId}");
 
             var removed = Consumers.Remove(consumerId);
 

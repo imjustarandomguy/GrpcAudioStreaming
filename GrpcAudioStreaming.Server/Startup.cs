@@ -42,7 +42,7 @@ namespace GrpcAudioStreaming.Server
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<AudioStreamService>();
+                endpoints.MapGrpcService<GrpcAudioStreamService>();
 
                 endpoints.MapGet("/", async context =>
                 {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
@@ -10,10 +10,6 @@
 		<PublishSingleFile>true</PublishSingleFile>
 		<PublishReadyToRun>true</PublishReadyToRun>
 	</PropertyGroup>
-
-    <ItemGroup>
-      <Content Include="icon.ico" />
-    </ItemGroup>
 
     <ItemGroup>
       <None Include="icon.ico">
@@ -42,7 +38,7 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="icon.ico">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 

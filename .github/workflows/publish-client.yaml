@@ -31,7 +31,7 @@ jobs:
           release_name="Client-$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish GrpcAudioStreaming.Client\GrpcAudioStreaming.Client.csproj --no-self-contained -c Release --runtime "${{ matrix.target }}" -o "$release_name"
+          dotnet publish GrpcAudioStreaming.Client/GrpcAudioStreaming.Client.csproj --no-self-contained -c Release --runtime "${{ matrix.target }}" -o "$release_name"
 
           # Pack files
           if [ "${{ matrix.target }}" == "win-x64" ]; then

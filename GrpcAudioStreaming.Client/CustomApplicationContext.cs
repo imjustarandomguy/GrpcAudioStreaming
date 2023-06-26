@@ -22,6 +22,7 @@ namespace GrpcAudioStreaming.Client
 
             _trayIcon.ContextMenuStrip = new ContextMenuStrip();
             _trayIcon.ContextMenuStrip.Items.Add("Play/Stop", null, TogglePlayStop);
+            _trayIcon.ContextMenuStrip.Items.Add("Restart", null, RestartPlayer);
             _trayIcon.ContextMenuStrip.Items.Add("Exit", null, ExitApplication);
         }
 
@@ -43,6 +44,18 @@ namespace GrpcAudioStreaming.Client
             {
                 _audioPlayer.Play();
             }
+        }
+
+        private void RestartPlayer(object sender, EventArgs e)
+        {
+            if (!_audioPlayer.Initilized) return;
+
+            if (_audioPlayer.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+            {
+                _audioPlayer.Stop();
+            }
+
+            _audioPlayer.Play();
         }
 
         private void OnProcessExit(object sender, EventArgs e)

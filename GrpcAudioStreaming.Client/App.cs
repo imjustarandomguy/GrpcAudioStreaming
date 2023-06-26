@@ -18,15 +18,20 @@ namespace GrpcAudioStreaming.Client
 
         public async Task Run(string[] args)
         {
+            Client client = null;
+
             while (true)
             {
                 try
                 {
-                    var client = _serviceProvider.GetService<Client>();
+                    client ??= _serviceProvider.GetService<Client>();
                     await client.ReceiveAndPlayData();
                 }
                 catch (Exception)
                 {
+                    client?.Disconnect();
+                    client = null;
+
                     if (_appSettings.AttemptAutomaticReconnect)
                     {
                         await Task.Delay(_appSettings.AutomaticReconnectDelay * 1000);

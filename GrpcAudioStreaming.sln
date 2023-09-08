@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcAudioStreaming.Server", "GrpcAudioStreaming.Server\GrpcAudioStreaming.Server.csproj", "{200D0DD0-1918-43BB-B35F-2956FAF6BC17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAudioStreaming.Server", "GrpcAudioStreaming.Server\GrpcAudioStreaming.Server.csproj", "{200D0DD0-1918-43BB-B35F-2956FAF6BC17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcAudioStreaming.Client", "GrpcAudioStreaming.Client\GrpcAudioStreaming.Client.csproj", "{516269B8-376C-49F9-9B6D-8D8C8D492543}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAudioStreaming.Client", "GrpcAudioStreaming.Client\GrpcAudioStreaming.Client.csproj", "{516269B8-376C-49F9-9B6D-8D8C8D492543}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcAudioStreaming.Proto", "GrpcAudioStreaming.Proto\GrpcAudioStreaming.Proto.csproj", "{62CEEC4C-C2B1-47E8-8E96-C0252ADDF90E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAudioStreaming.Proto", "GrpcAudioStreaming.Proto\GrpcAudioStreaming.Proto.csproj", "{62CEEC4C-C2B1-47E8-8E96-C0252ADDF90E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,9 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{200D0DD0-1918-43BB-B35F-2956FAF6BC17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -58,5 +55,8 @@ Global
 		{62CEEC4C-C2B1-47E8-8E96-C0252ADDF90E}.Release|x64.Build.0 = Release|Any CPU
 		{62CEEC4C-C2B1-47E8-8E96-C0252ADDF90E}.Release|x86.ActiveCfg = Release|Any CPU
 		{62CEEC4C-C2B1-47E8-8E96-C0252ADDF90E}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

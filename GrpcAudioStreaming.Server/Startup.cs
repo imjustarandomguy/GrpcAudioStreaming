@@ -1,4 +1,5 @@
-﻿using GrpcAudioStreaming.Server.Services;
+﻿using GrpcAudioStreaming.Proto.Codecs;
+using GrpcAudioStreaming.Server.Services;
 using GrpcAudioStreaming.Server.Settings;
 using GrpcAudioStreaming.Server.Sources;
 using Microsoft.AspNetCore.Builder;
@@ -24,8 +25,9 @@ namespace GrpcAudioStreaming.Server
                 .Build();
 
             services.Configure<AudioSettings>(configuration.GetSection(AudioSettings.RootPath));
-
+             
             services.AddGrpc();
+            services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec")));
             services.AddSingleton<LoopbackAudioStreamerService>();
             services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
         }

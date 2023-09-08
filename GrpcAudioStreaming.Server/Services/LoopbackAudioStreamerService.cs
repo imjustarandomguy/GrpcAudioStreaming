@@ -1,4 +1,5 @@
-﻿using GrpcAudioStreaming.Server.Models;
+﻿using GrpcAudioStreaming.Proto.Codecs;
+using GrpcAudioStreaming.Server.Models;
 using GrpcAudioStreaming.Server.Settings;
 using GrpcAudioStreaming.Server.Utils;
 using Microsoft.Extensions.Options;
@@ -10,7 +11,8 @@ namespace GrpcAudioStreaming.Server.Services
 {
     public partial class LoopbackAudioStreamerService : IDisposable
     {
-        private Memory<byte> _buffer = new byte[1024];
+        private readonly ICodec _codec;
+        private byte[] _buffer = new byte[1024];
         private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
 
@@ -18,8 +20,9 @@ namespace GrpcAudioStreaming.Server.Services
         public AsyncEnumerableSource<Memory<byte>> Source { get; private set; } = new AsyncEnumerableSource<Memory<byte>>();
         public WaveFormat WaveFormat { get; private set; } = null!;
 
-        public LoopbackAudioStreamerService(IOptions<AudioSettings> audioSettings)
+        public LoopbackAudioStreamerService(ICodec codec, IOptions<AudioSettings> audioSettings)
         {
+            _codec = codec;
             _audioSettings = audioSettings.Value;
             WaveFormat = new WaveFormat(_audioSettings.SampleRate, _audioSettings.BitsPerSample, _audioSettings.Channels);
         }
@@ -83,7 +86,7 @@ namespace GrpcAudioStreaming.Server.Services
 
             e.Buffer.AsMemory()[..e.BytesRecorded].CopyTo(_buffer);
 
-            Source.YieldReturn(_buffer[..e.BytesRecorded]);
+            Source.YieldReturn(_codec.Encode(_buffer, 0, e.BytesRecorded));
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)

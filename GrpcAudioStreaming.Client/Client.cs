@@ -3,6 +3,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcAudioStreaming.Client.Extensions;
 using GrpcAudioStreaming.Client.Models;
+using GrpcAudioStreaming.Proto.Codecs;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
@@ -13,6 +14,7 @@ namespace GrpcAudioStreaming.Client
 {
     public class Client
     {
+        private readonly ICodec _codec;
         private readonly AppSettings _appSettings;
         private readonly AudioPlayer _audioPlayer;
         private readonly AsyncServerStreamingCall<AudioSample> _audioStream;
@@ -20,8 +22,9 @@ namespace GrpcAudioStreaming.Client
 
         public ClientState State = ClientState.None;
 
-        public Client(AudioPlayer audioPlayer, IOptions<AppSettings> appSettings)
+        public Client(ICodec codec, AudioPlayer audioPlayer, IOptions<AppSettings> appSettings)
         {
+            _codec = codec;
             _audioPlayer = audioPlayer;
             _appSettings = appSettings.Value;
             _cancellationTokenSource = new CancellationTokenSource();
@@ -57,7 +60,7 @@ namespace GrpcAudioStreaming.Client
         {
             await foreach (var sample in _audioStream.ResponseStream.ReadAllAsync(_cancellationTokenSource.Token))
             {
-                _audioPlayer.AddSample(sample.Data.ToByteArray());
+                _audioPlayer.AddSample(_codec.Decode(sample.Data.ToByteArray(), 0, sample.Data.Length));
             }
         }
 

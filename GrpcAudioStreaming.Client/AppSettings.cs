@@ -2,6 +2,8 @@
 {
     public class AppSettings
     {
+        public const string RootPath = "App";
+
         public string ServerUrl { get; set; }
 
         public int PlayerDesiredLatency { get; set; }

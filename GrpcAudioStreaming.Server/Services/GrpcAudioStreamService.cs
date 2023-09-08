@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcAudioStreaming.Server.Models;
 using GrpcAudioStreaming.Server.Sources;
 using System;
 using System.Threading.Tasks;
@@ -18,9 +19,12 @@ namespace GrpcAudioStreaming.Server.Services
 
         public override Task GetStream(Empty request, IServerStreamWriter<AudioSample> responseStream, ServerCallContext context)
         {
+            var audioConsumer = new AudioConsumer(Id: Guid.NewGuid().ToString(), Ip: new Uri(context.Peer.Replace("ipv4:", "ipv4://"))?.Host);
+
             _responseStream = responseStream;
             _audioSampleSource.AudioSampleCreated += OnAudioSampleCreated;
-            return _audioSampleSource.StartStreaming();
+
+            return _audioSampleSource.StartStreaming(audioConsumer);
         }
 
         public override Task<AudioFormat> GetFormat(Empty request, ServerCallContext context)

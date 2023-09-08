@@ -16,7 +16,7 @@ namespace GrpcAudioStreaming.Server.Services
         private readonly AudioSettings _audioSettings;
         private WasapiLoopbackCapture _capture = null!;
 
-        public Dictionary<string, LoopbackAudioConsumer> Consumers { get; private set; } = new Dictionary<string, LoopbackAudioConsumer>();
+        public Dictionary<string, AudioConsumer> Consumers { get; private set; } = new Dictionary<string, AudioConsumer>();
         public AsyncEnumerableSource<Memory<byte>> Source { get; private set; } = new AsyncEnumerableSource<Memory<byte>>();
         public WaveFormat WaveFormat { get; private set; } = null!;
 
@@ -27,11 +27,11 @@ namespace GrpcAudioStreaming.Server.Services
             WaveFormat = new WaveFormat(_audioSettings.SampleRate, _audioSettings.BitsPerSample, _audioSettings.Channels);
         }
 
-        public void RegisterNewConsumer(LoopbackAudioConsumer consumer)
+        public void RegisterNewConsumer(AudioConsumer consumer)
         {
             if (string.IsNullOrEmpty(consumer.Id)) return;
 
-            Console.WriteLine($"Registering new consumer: {consumer.Id}");
+            Console.WriteLine($"Registering new consumer. Id: {consumer.Id}, Ip: {consumer.Ip}");
 
             Consumers.Add(consumer.Id, consumer);
 
@@ -46,9 +46,13 @@ namespace GrpcAudioStreaming.Server.Services
         {
             if (string.IsNullOrEmpty(consumerId)) return;
 
-            Console.WriteLine($"Unregistering consumer: {consumerId}");
+            var consumer = Consumers[consumerId];
 
-            var removed = Consumers.Remove(consumerId);
+            if (consumer is null) return;
+
+            Console.WriteLine($"Unregistering consumer. Id: {consumer.Id}, Ip: {consumer.Ip}");
+
+            var removed = Consumers.Remove(consumer.Id);
 
             if (removed && Consumers.Count <= 0)
             {
@@ -59,7 +63,7 @@ namespace GrpcAudioStreaming.Server.Services
 
         public void Dispose()
         {
-            Consumers = new Dictionary<string, LoopbackAudioConsumer>();
+            Consumers = new Dictionary<string, AudioConsumer>();
             _capture?.StopRecording();
             GC.SuppressFinalize(this);
         }

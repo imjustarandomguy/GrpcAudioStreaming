@@ -1,3 +1,4 @@
+using GrpcAudioStreaming.Server.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace GrpcAudioStreaming.Server.Sources
 
         AudioFormat AudioFormat { get; }
 
-        Task StartStreaming();
+        Task StartStreaming(AudioConsumer consumer);
 
         void StopStreaming();
     }

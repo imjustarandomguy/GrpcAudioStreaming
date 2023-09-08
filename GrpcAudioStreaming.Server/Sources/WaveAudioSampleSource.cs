@@ -1,5 +1,6 @@
 using Google.Protobuf;
 using GrpcAudioStreaming.Server.Extensions;
+using GrpcAudioStreaming.Server.Models;
 using NAudio.Wave;
 using System;
 using System.Threading;
@@ -23,7 +24,7 @@ namespace GrpcAudioStreaming.Server.Sources
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public Task StartStreaming()
+        public Task StartStreaming(AudioConsumer consumer)
         {
             return Task.Factory.StartNew(() => Stream(_waveFileReader, _cancellationTokenSource.Token), TaskCreationOptions.LongRunning);
         }

@@ -14,28 +14,27 @@ namespace GrpcAudioStreaming.Server.Sources
 
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly LoopbackAudioStreamerService _audioStreamer;
-        private readonly string consumerId;
+        private AudioConsumer _consumer;
 
         public AudioFormat AudioFormat { get; }
 
         public LoopbackAudioSampleSource(LoopbackAudioStreamerService audioStreamer)
         {
-            consumerId = Guid.NewGuid().ToString();
-
             _audioStreamer = audioStreamer;
             _cancellationTokenSource = new CancellationTokenSource();
             AudioFormat = _audioStreamer.WaveFormat.ToAudioFormat();
         }
 
-        public Task StartStreaming()
+        public Task StartStreaming(AudioConsumer consumer)
         {
-            _audioStreamer.RegisterNewConsumer(new LoopbackAudioConsumer { Id = consumerId });
+            _consumer = consumer;
+            _audioStreamer.RegisterNewConsumer(consumer);
             return Stream(_cancellationTokenSource.Token);
         }
 
         public void StopStreaming()
         {
-            _audioStreamer.UnregisterConsumer(consumerId);
+            _audioStreamer.UnregisterConsumer(_consumer.Id);
             _cancellationTokenSource.Cancel();
         }
 

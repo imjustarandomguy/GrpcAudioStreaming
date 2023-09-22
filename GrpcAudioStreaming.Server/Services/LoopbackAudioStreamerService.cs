@@ -46,7 +46,7 @@ namespace GrpcAudioStreaming.Server.Services
         {
             if (string.IsNullOrEmpty(consumerId)) return;
 
-            var consumer = Consumers[consumerId];
+            var consumer = Consumers.GetValueOrDefault(consumerId);
 
             if (consumer is null) return;
 

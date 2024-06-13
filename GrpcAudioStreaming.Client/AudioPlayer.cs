@@ -4,7 +4,7 @@ using System;
 
 namespace GrpcAudioStreaming.Client
 {
-    public class AudioPlayer : WaveOutEvent
+    public class AudioPlayer : DirectSoundOut
     {
         private readonly AppSettings _appSettings;
         private BufferedWaveProvider _bufferedWaveProvider;
@@ -14,7 +14,7 @@ namespace GrpcAudioStreaming.Client
         public AudioPlayer(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
-            DesiredLatency = _appSettings.PlayerDesiredLatency;
+            //DesiredLatency = _appSettings.PlayerDesiredLatency;
             Volume = _appSettings.Volume;
         }
 

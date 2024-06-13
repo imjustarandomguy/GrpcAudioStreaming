@@ -8,7 +8,7 @@
 	<PublishSingleFile>true</PublishSingleFile>
 	<PublishReadyToRun>true</PublishReadyToRun>
 	<ServerGarbageCollection>false</ServerGarbageCollection>
-	<Version>1.0.10</Version>
+	<Version>1.0.11</Version>
   </PropertyGroup>
 
   <ItemGroup>

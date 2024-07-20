@@ -6,6 +6,8 @@
 
         public string ServerUrl { get; set; }
 
+        public string DeviceName { get; set; }
+
         public int PlayerDesiredLatency { get; set; }
 
         public int BufferDuration { get; set; }

@@ -34,7 +34,7 @@ namespace GrpcAudioStreaming.Client
 
         private void TogglePlayStop(object sender, EventArgs e)
         {
-            if (!_audioPlayer.Initilized) return;
+            if (!_audioPlayer.Initialized) return;
 
             if (_audioPlayer.PlaybackState == NAudio.Wave.PlaybackState.Playing)
             {
@@ -46,16 +46,11 @@ namespace GrpcAudioStreaming.Client
             }
         }
 
-        private void RestartPlayer(object sender, EventArgs e)
+        private async void RestartPlayer(object sender, EventArgs e)
         {
-            if (!_audioPlayer.Initilized) return;
+            if (!_audioPlayer.Initialized) return;
 
-            if (_audioPlayer.PlaybackState == NAudio.Wave.PlaybackState.Playing)
-            {
-                _audioPlayer.Stop();
-            }
-
-            _audioPlayer.Play();
+            await _audioPlayer.Restart();
         }
 
         private void OnProcessExit(object sender, EventArgs e)

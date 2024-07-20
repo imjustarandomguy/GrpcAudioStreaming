@@ -49,6 +49,7 @@ namespace GrpcAudioStreaming.Client
 
             services.Configure<AppSettings>(configuration.GetSection(AppSettings.RootPath));
 
+            services.AddSingleton<DeviceAccessor>();
             services.AddTransient<App>();
             services.AddScoped<AudioPlayer>();
             services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AppSettings.RootPath}:Codec")));

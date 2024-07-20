@@ -5,16 +5,10 @@ using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Client
 {
-    public class App
+    public class App(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings)
     {
-        private readonly AppSettings _appSettings;
-        private readonly IServiceProvider _serviceProvider;
-
-        public App(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings)
-        {
-            _serviceProvider = serviceProvider;
-            _appSettings = appSettings.Value;
-        }
+        private readonly AppSettings _appSettings = appSettings.Value;
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public async Task Run(string[] args)
         {

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
+using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Client
 {
@@ -9,12 +10,12 @@ namespace GrpcAudioStreaming.Client
         private readonly AppSettings _appSettings;
         private BufferedWaveProvider _bufferedWaveProvider;
 
-        public bool Initilized { get; private set; }
+        public bool Initialized { get; private set; }
 
-        public AudioPlayer(IOptions<AppSettings> appSettings)
+        public AudioPlayer(IOptions<AppSettings> appSettings, DeviceAccessor deviceAccessor)
+            : base(deviceAccessor.Device, appSettings.Value.PlayerDesiredLatency)
         {
             _appSettings = appSettings.Value;
-            //DesiredLatency = _appSettings.PlayerDesiredLatency;
             Volume = _appSettings.Volume;
         }
 
@@ -28,12 +29,15 @@ namespace GrpcAudioStreaming.Client
 
             Init(_bufferedWaveProvider);
 
-            Initilized = true;
+            Initialized = true;
         }
 
         public void AddSample(byte[] sample)
         {
-            _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
+            if (PlaybackState == PlaybackState.Playing)
+            {
+                _bufferedWaveProvider.AddSamples(sample, 0, sample.Length);
+            }
         }
 
         public virtual new void Play()
@@ -46,6 +50,17 @@ namespace GrpcAudioStreaming.Client
         {
             base.Stop();
             _bufferedWaveProvider.ClearBuffer();
+        }
+
+        public async Task Restart()
+        {
+            base.Stop();
+
+            _bufferedWaveProvider.ClearBuffer();
+
+            await Task.Delay(100);
+
+            base.Play();
         }
     }
 }

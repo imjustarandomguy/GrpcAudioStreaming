@@ -22,9 +22,8 @@ namespace GrpcAudioStreaming.Client
 
         public ClientState State = ClientState.None;
 
-        public Client(ICodec codec, AudioPlayer audioPlayer, IOptions<AppSettings> appSettings)
+        public Client(AudioPlayer audioPlayer, IOptions<AppSettings> appSettings)
         {
-            _codec = codec;
             _audioPlayer = audioPlayer;
             _appSettings = appSettings.Value;
             _cancellationTokenSource = new CancellationTokenSource();
@@ -33,7 +32,7 @@ namespace GrpcAudioStreaming.Client
             {
                 PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
                 KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                KeepAlivePingTimeout = TimeSpan.FromSeconds(30)
+                KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
             };
 
             try
@@ -41,6 +40,8 @@ namespace GrpcAudioStreaming.Client
                 var channel = GrpcChannel.ForAddress(_appSettings.ServerUrl, new GrpcChannelOptions { HttpHandler = handler });
                 var client = new AudioStream.AudioStreamClient(channel);
                 var format = client.GetFormat(new Empty());
+
+                _codec = CodecFactory.GetOrDefault(format.Codec);
 
                 _audioPlayer.Init(format.ToWaveFormat());
                 _audioPlayer.Play();

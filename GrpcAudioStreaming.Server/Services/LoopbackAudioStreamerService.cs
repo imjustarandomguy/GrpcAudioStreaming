@@ -1,8 +1,10 @@
 ﻿using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Models;
 using GrpcAudioStreaming.Server.Settings;
+using GrpcAudioStreaming.Server.Sources;
 using GrpcAudioStreaming.Server.Utils;
 using Microsoft.Extensions.Options;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -14,10 +16,10 @@ namespace GrpcAudioStreaming.Server.Services
         private readonly ICodec _codec;
         private byte[] _buffer = new byte[1024];
         private readonly AudioSettings _audioSettings;
-        private WasapiLoopbackCapture _capture = null!;
+        private WasapiCapture _capture = null!;
 
         public Dictionary<string, AudioConsumer> Consumers { get; private set; } = new Dictionary<string, AudioConsumer>();
-        public AsyncEnumerableSource<Memory<byte>> Source { get; private set; } = new AsyncEnumerableSource<Memory<byte>>();
+        public AsyncEnumerableSource<(Memory<byte> data, double lengthMs)> Source { get; private set; } = new AsyncEnumerableSource<(Memory<byte> data, double lengthMs)>();
         public WaveFormat WaveFormat { get; private set; } = null!;
 
         public LoopbackAudioStreamerService(ICodec codec, IOptions<AudioSettings> audioSettings)
@@ -63,16 +65,16 @@ namespace GrpcAudioStreaming.Server.Services
 
         public void Dispose()
         {
-            Consumers = new Dictionary<string, AudioConsumer>();
+            Consumers = [];
             _capture?.StopRecording();
             GC.SuppressFinalize(this);
         }
 
         private void InitiateRecording()
         {
-            Source = new AsyncEnumerableSource<Memory<byte>>();
+            Source = new AsyncEnumerableSource<(Memory<byte> data, double lengthMs)>();
 
-            _capture = new WasapiLoopbackCapture { WaveFormat = WaveFormat };
+            _capture = new WasapiBufferedLoopbackCapture(useEventSync: true, audioBufferMillisecondsLength: 10) { WaveFormat = WaveFormat };
 
             _capture.DataAvailable += OnDataAvailable;
 
@@ -90,7 +92,7 @@ namespace GrpcAudioStreaming.Server.Services
 
             e.Buffer.AsMemory()[..e.BytesRecorded].CopyTo(_buffer);
 
-            Source.YieldReturn(_codec.Encode(_buffer, 0, e.BytesRecorded));
+            Source.YieldReturn((_codec.Encode(_buffer, 0, e.BytesRecorded), GetRecordingLengthInMs(e.BytesRecorded)));
         }
 
         private void OnRecordingStop(object sender, StoppedEventArgs e)
@@ -98,6 +100,11 @@ namespace GrpcAudioStreaming.Server.Services
             _capture.Dispose();
             Source.Complete();
             _capture = null;
+        }
+
+        private double GetRecordingLengthInMs(int bytesRecorded)
+        {
+            return bytesRecorded / (double)(WaveFormat.SampleRate * WaveFormat.Channels * (WaveFormat.BitsPerSample / 8)) * 1000;
         }
     }
 }

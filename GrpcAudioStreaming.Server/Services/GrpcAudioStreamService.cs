@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Models;
 using GrpcAudioStreaming.Server.Sources;
 using GrpcAudioStreaming.Server.Utils;
@@ -8,14 +9,9 @@ using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Server.Services
 {
-    public class GrpcAudioStreamService : AudioStream.AudioStreamBase
+    public class GrpcAudioStreamService(ICodec codec, IAudioSampleSource audioSampleSource) : AudioStream.AudioStreamBase
     {
-        private readonly IAudioSampleSource _audioSampleSource;
-
-        public GrpcAudioStreamService(IAudioSampleSource audioSampleSource)
-        {
-            _audioSampleSource = audioSampleSource;
-        }
+        private readonly IAudioSampleSource _audioSampleSource = audioSampleSource;
 
         public override Task GetStream(Empty request, IServerStreamWriter<AudioSample> responseStream, ServerCallContext context)
         {
@@ -23,10 +19,7 @@ namespace GrpcAudioStreaming.Server.Services
 
             var responseQueue = new GrpcStreamResponseQueue<AudioSample>(responseStream)
             {
-                OnComplete = () =>
-                {
-                    _audioSampleSource.StopStreaming();
-                }
+                OnComplete = _audioSampleSource.StopStreaming,
             };
 
             _audioSampleSource.AudioSampleCreated += async (object sender, AudioSample audioSample) =>
@@ -39,6 +32,8 @@ namespace GrpcAudioStreaming.Server.Services
 
         public override Task<AudioFormat> GetFormat(Empty request, ServerCallContext context)
         {
+            _audioSampleSource.AudioFormat.Codec = CodecFactory.GetOrDefault(codec).ToString();
+            _audioSampleSource.AudioFormat.Timestamp = DateTime.UtcNow.ToString("o");
             return Task.FromResult(_audioSampleSource.AudioFormat);
         }
     }

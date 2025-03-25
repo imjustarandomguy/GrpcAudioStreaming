@@ -42,9 +42,9 @@ namespace GrpcAudioStreaming.Server.Sources
         {
             var audioSample = new AudioSample();
 
-            await foreach (var data in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
+            await foreach (var (data, lengthMs) in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
             {
-                audioSample.Timestamp = DateTime.Now.ToString("o");
+                audioSample.Timestamp = DateTime.Now.AddMilliseconds(-lengthMs).ToString("o");
                 audioSample.Data = UnsafeByteOperations.UnsafeWrap(data);
 
                 OnAudioSampleCreated(audioSample);

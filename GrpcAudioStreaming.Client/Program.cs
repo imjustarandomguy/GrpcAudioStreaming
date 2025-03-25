@@ -1,5 +1,4 @@
-﻿using GrpcAudioStreaming.Proto.Codecs;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
@@ -52,7 +51,6 @@ namespace GrpcAudioStreaming.Client
             services.AddSingleton<DeviceAccessor>();
             services.AddTransient<App>();
             services.AddScoped<AudioPlayer>();
-            services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AppSettings.RootPath}:Codec")));
             services.AddSingleton<Client>();
             services.AddSingleton<CustomApplicationContext>();
         }

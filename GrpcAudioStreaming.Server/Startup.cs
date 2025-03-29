@@ -25,7 +25,14 @@ namespace GrpcAudioStreaming.Server
                 .Build();
 
             services.Configure<AudioSettings>(configuration.GetSection(AudioSettings.RootPath));
-             
+
+            services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+            }));
+
             services.AddGrpc();
             services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec")));
             services.AddSingleton<LoopbackAudioStreamerService>();
@@ -41,15 +48,13 @@ namespace GrpcAudioStreaming.Server
             }
 
             app.UseRouting();
+            app.UseGrpcWeb();
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GrpcAudioStreamService>();
-
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-                });
+                endpoints.MapGrpcService<GrpcAudioStreamService>().EnableGrpcWeb().RequireCors("AllowAll");
+                endpoints.MapGet("/", () => "gRPC server running...");
             });
         }
     }

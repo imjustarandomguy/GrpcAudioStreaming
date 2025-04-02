@@ -16,13 +16,13 @@ namespace GrpcAudioStreaming.Client
     {
         private readonly ICodec _codec;
         private readonly AppSettings _appSettings;
-        private readonly AudioPlayer _audioPlayer;
+        private readonly NAudioAudioPlayer _audioPlayer;
         private readonly AsyncServerStreamingCall<AudioSample> _audioStream;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
         public ClientState State = ClientState.None;
 
-        public Client(AudioPlayer audioPlayer, IOptions<AppSettings> appSettings)
+        public Client(NAudioAudioPlayer audioPlayer, DefaultAudioDeviceChangeHandler defaultAudioDeviceChangeHandler, IOptions<AppSettings> appSettings)
         {
             _audioPlayer = audioPlayer;
             _appSettings = appSettings.Value;
@@ -49,6 +49,8 @@ namespace GrpcAudioStreaming.Client
                 _audioStream = client.GetStream(new Empty());
 
                 State = ClientState.Connected;
+
+                defaultAudioDeviceChangeHandler.Init(_audioPlayer);
             }
             catch (Exception)
             {

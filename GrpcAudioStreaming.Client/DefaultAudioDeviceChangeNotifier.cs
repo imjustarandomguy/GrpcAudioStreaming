@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace GrpcAudioStreaming.Client
 {
-    internal class DefaultAudioDeviceChangeNotifier : IMMNotificationClient, IDisposable
+    public class DefaultAudioDeviceChangeNotifier : IMMNotificationClient, IDisposable
     {
         private readonly MMDeviceEnumerator _deviceEnum = new();
 
@@ -34,7 +34,7 @@ namespace GrpcAudioStreaming.Client
         /// <param name="defaultDeviceId"></param>
         public void OnDefaultDeviceChanged(DataFlow dataFlow, Role deviceRole, string defaultDeviceId)
         {
-            Debug.WriteLine($"AudioDeviceChangeNotifier::OnDefaultDeviceChanged - dataFlow: {dataFlow}, deviceRole: {deviceRole}, defaultDeviceId: {defaultDeviceId}");
+            //Debug.WriteLine($"AudioDeviceChangeNotifier::OnDefaultDeviceChanged - dataFlow: {dataFlow}, deviceRole: {deviceRole}, defaultDeviceId: {defaultDeviceId}");
 
             DefaultDeviceChanged?.Invoke(dataFlow, deviceRole, defaultDeviceId);
         }
@@ -52,7 +52,7 @@ namespace GrpcAudioStreaming.Client
         /// <param name="deviceId"></param>
         public void OnDeviceAdded(string deviceId)
         {
-            Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceAdded - deviceId: {deviceId}");
+            //Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceAdded - deviceId: {deviceId}");
 
             DeviceAdded?.Invoke(deviceId);
         }
@@ -70,7 +70,7 @@ namespace GrpcAudioStreaming.Client
         /// <param name="deviceId"></param>
         public void OnDeviceRemoved(string deviceId)
         {
-            Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceRemoved - deviceId: {deviceId}");
+            //Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceRemoved - deviceId: {deviceId}");
 
             DeviceAdded?.Invoke(deviceId);
         }
@@ -89,7 +89,7 @@ namespace GrpcAudioStreaming.Client
         /// <param name="newState"></param>
         public void OnDeviceStateChanged(string deviceId, DeviceState newState)
         {
-            Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceStateChanged - deviceId: {deviceId}, newState: {newState}");
+            //Debug.WriteLine($"AudioDeviceChangeNotifier::OnDeviceStateChanged - deviceId: {deviceId}, newState: {newState}");
 
             DeviceStateChanged?.Invoke(deviceId, newState);
         }
@@ -108,7 +108,7 @@ namespace GrpcAudioStreaming.Client
         /// <param name="propertyKey"></param>
         public void OnPropertyValueChanged(string deviceId, PropertyKey propertyKey)
         {
-            Debug.WriteLine($"AudioDeviceChangeNotifier::OnPropertyValueChanged - deviceId: {deviceId}, propertyKey: {propertyKey}");
+            //Debug.WriteLine($"AudioDeviceChangeNotifier::OnPropertyValueChanged - deviceId: {deviceId}, propertyKey: {propertyKey}");
 
             PropertyValueChanged?.Invoke(deviceId);
         }

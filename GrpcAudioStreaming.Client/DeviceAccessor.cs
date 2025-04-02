@@ -16,5 +16,16 @@ namespace GrpcAudioStreaming.Client
 
             Device = device?.Guid ?? Guid.Empty;
         }
+
+        public void SetDeviceById(Guid deviceId)
+        {
+            Device = deviceId;
+        }
+
+        public void SetDeviceByName(string deviceName)
+        {
+            var device = DirectSoundOut.Devices.FirstOrDefault(device => device.Description == deviceName);
+            Device = device?.Guid ?? Guid.Empty;
+        }
     }
 }

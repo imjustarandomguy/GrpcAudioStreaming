@@ -50,9 +50,10 @@ namespace GrpcAudioStreaming.Client
 
             services.AddSingleton<DeviceAccessor>();
             services.AddTransient<App>();
-            services.AddScoped<AudioPlayer>();
+            services.AddScoped<NAudioAudioPlayer>();
             services.AddSingleton<Client>();
             services.AddSingleton<CustomApplicationContext>();
+            services.AddScoped<DefaultAudioDeviceChangeHandler>();
         }
     }
 }

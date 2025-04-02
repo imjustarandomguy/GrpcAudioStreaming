@@ -1,13 +1,14 @@
 ﻿using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Services;
+using GrpcAudioStreaming.Server.Services.Recorders;
 using GrpcAudioStreaming.Server.Settings;
 using GrpcAudioStreaming.Server.Sources;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System.IO;
 
 namespace GrpcAudioStreaming.Server
@@ -33,9 +34,17 @@ namespace GrpcAudioStreaming.Server
                         .AllowAnyHeader();
             }));
 
+            var codec = CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec"));
+
             services.AddGrpc();
-            services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec")));
-            services.AddSingleton<LoopbackAudioStreamerService>();
+            services.AddSingleton(codec);
+
+            services.AddSingleton(provider =>
+            {
+                var audioSettings = provider.GetRequiredService<IOptions<AudioSettings>>();
+                return RecorderEngineFactory.GetOrDefault(configuration.GetValue<string>("Engine"), codec, audioSettings);
+            });
+
             services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
         }
 

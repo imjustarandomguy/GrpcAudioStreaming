@@ -1,7 +1,7 @@
 using Google.Protobuf;
 using GrpcAudioStreaming.Server.Extensions;
 using GrpcAudioStreaming.Server.Models;
-using GrpcAudioStreaming.Server.Services;
+using GrpcAudioStreaming.Server.Services.Recorders;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +13,12 @@ namespace GrpcAudioStreaming.Server.Sources
         public event EventHandler<AudioSample> AudioSampleCreated;
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly LoopbackAudioStreamerService _audioStreamer;
+        private readonly ILoopbackAudioStreamerService _audioStreamer;
         private AudioConsumer _consumer;
 
         public AudioFormat AudioFormat { get; }
 
-        public LoopbackAudioSampleSource(LoopbackAudioStreamerService audioStreamer)
+        public LoopbackAudioSampleSource(ILoopbackAudioStreamerService audioStreamer)
         {
             _audioStreamer = audioStreamer;
             _cancellationTokenSource = new CancellationTokenSource();

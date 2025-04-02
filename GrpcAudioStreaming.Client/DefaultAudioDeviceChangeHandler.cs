@@ -28,15 +28,6 @@ namespace GrpcAudioStreaming.Client
 
                 var deviceId = Guid.Parse(match.Groups[1].Value);
 
-                if (deviceId == Guid.Parse("be543746-e7d1-4fb8-9fe7-0f5190d7d70f"))
-                {
-                    deviceId = Guid.Parse("3b920af3-98d5-4672-8deb-19cd564358e1");
-                }
-                else if (deviceId == Guid.Parse("3b920af3-98d5-4672-8deb-19cd564358e1"))
-                {
-                    deviceId = Guid.Parse("be543746-e7d1-4fb8-9fe7-0f5190d7d70f");
-                }
-
                 if (!audioPlayer.Initialized)
                 {
                     return;

@@ -11,7 +11,7 @@ namespace GrpcAudioStreaming.Client
         private readonly DeviceAccessor _deviceAccessor = deviceAccessor;
 
         private BufferedWaveProvider _bufferedWaveProvider;
-        private DirectSoundOut _player;
+        private WaveOutEvent _player;
         private WaveFormat _waveFormat;
 
         public bool Initialized { get; private set; }
@@ -23,24 +23,25 @@ namespace GrpcAudioStreaming.Client
         {
             _waveFormat = waveFormat;
 
-            InitPlayer();
+            Device = _deviceAccessor.Device;
+            InitPlayer(Device);
 
             Initialized = true;
         }
 
-        public void InitPlayer()
+        public void InitPlayer(Guid deviceId)
         {
-            Device = _deviceAccessor.Device;
-
             _bufferedWaveProvider = new BufferedWaveProvider(_waveFormat)
             {
                 BufferDuration = TimeSpan.FromMilliseconds(_appSettings.BufferDuration),
                 DiscardOnBufferOverflow = _appSettings.DiscardOnBufferOverflow,
             };
 
-            _player = new DirectSoundOut(_deviceAccessor.Device, _appSettings.PlayerDesiredLatency)
+            _player = new WaveOutEvent
             {
-                Volume = _appSettings.Volume
+                DeviceNumber = -1,
+                DesiredLatency = _appSettings.PlayerDesiredLatency,
+                Volume = _appSettings.Volume,
             };
 
             _player.Init(_bufferedWaveProvider);
@@ -56,33 +57,33 @@ namespace GrpcAudioStreaming.Client
 
         public void Play()
         {
-            _bufferedWaveProvider.ClearBuffer();
-            _player.Play();
+            _bufferedWaveProvider?.ClearBuffer();
+            _player?.Play();
         }
 
         public void Stop()
         {
-            _player.Stop();
-            _bufferedWaveProvider.ClearBuffer();
+            _player?.Stop();
+            _bufferedWaveProvider?.ClearBuffer();
         }
 
         public async Task Restart()
         {
-            _player.Stop();
-
-            _bufferedWaveProvider.ClearBuffer();
+            _player?.Stop();
+            _bufferedWaveProvider?.ClearBuffer();
 
             await Task.Delay(100);
 
-            _player.Play();
+            _player?.Play();
         }
 
-        public void SetDevice()
+        public void SetDevice(Guid deviceId)
         {
             Stop();
-            _player.Dispose();
+            _player?.Dispose();
 
-            InitPlayer();
+            Device = deviceId;
+            InitPlayer(Device);
 
             Play();
         }
@@ -90,6 +91,7 @@ namespace GrpcAudioStreaming.Client
         public void Dispose()
         {
             Stop();
+            _player?.Dispose();
             GC.SuppressFinalize(this);
         }
     }

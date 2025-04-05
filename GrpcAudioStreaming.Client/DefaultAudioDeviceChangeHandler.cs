@@ -1,6 +1,5 @@
 ﻿using NAudio.CoreAudioApi;
 using System;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace GrpcAudioStreaming.Client
@@ -13,7 +12,17 @@ namespace GrpcAudioStreaming.Client
 
             changeNotifier.DefaultDeviceChanged += (DataFlow dataFlow, Role deviceRole, string defaultDeviceId) =>
             {
-                if (dataFlow == DataFlow.Capture)
+                if (!audioPlayer.Initialized)
+                {
+                    return;
+                }
+
+                if (dataFlow != DataFlow.Render)
+                {
+                    return;
+                }
+
+                if (deviceRole != Role.Multimedia)
                 {
                     return;
                 }
@@ -28,18 +37,13 @@ namespace GrpcAudioStreaming.Client
 
                 var deviceId = Guid.Parse(match.Groups[1].Value);
 
-                if (!audioPlayer.Initialized)
-                {
-                    return;
-                }
-
                 if (audioPlayer.Device == deviceId)
                 {
                     return;
                 }
 
                 deviceAccessor.SetDeviceById(deviceId);
-                audioPlayer.SetDevice();
+                audioPlayer.SetDevice(deviceId);
             };
         }
     }

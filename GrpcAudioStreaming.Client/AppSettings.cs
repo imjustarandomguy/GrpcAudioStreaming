@@ -14,6 +14,8 @@
 
         public bool DiscardOnBufferOverflow { get; set; }
 
+        public bool DefaultAudioDeviceChangeHandler { get; set; }
+
         public bool AttemptAutomaticReconnect { get; set; }
 
         public int AutomaticReconnectDelay { get; set; }

@@ -50,7 +50,10 @@ namespace GrpcAudioStreaming.Client
 
                 State = ClientState.Connected;
 
-                defaultAudioDeviceChangeHandler.Init(_audioPlayer);
+                if (_appSettings.DefaultAudioDeviceChangeHandler)
+                {
+                    defaultAudioDeviceChangeHandler.Init(_audioPlayer);
+                }
             }
             catch (Exception)
             {

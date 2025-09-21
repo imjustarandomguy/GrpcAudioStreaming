@@ -6,35 +6,35 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Server.Sources
+namespace GrpcAudioStreaming.Server.Streamers.Grpc
 {
-    public class LoopbackAudioSampleSource : IAudioSampleSource, IDisposable
+    public class LoopbackGrpcStreamer : IGrpcStreamer, IDisposable
     {
         public event EventHandler<AudioSample> AudioSampleCreated;
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly ILoopbackAudioStreamerService _audioStreamer;
+        private readonly ILoopbackAudioStreamerService _audioStreamerService;
         private AudioConsumer _consumer;
 
         public AudioFormat AudioFormat { get; }
 
-        public LoopbackAudioSampleSource(ILoopbackAudioStreamerService audioStreamer)
+        public LoopbackGrpcStreamer(ILoopbackAudioStreamerService audioStreamerService)
         {
-            _audioStreamer = audioStreamer;
+            _audioStreamerService = audioStreamerService;
             _cancellationTokenSource = new CancellationTokenSource();
-            AudioFormat = _audioStreamer.WaveFormat.ToAudioFormat();
+            AudioFormat = _audioStreamerService.WaveFormat.ToAudioFormat();
         }
 
         public Task StartStreaming(AudioConsumer consumer)
         {
             _consumer = consumer;
-            _audioStreamer.RegisterNewConsumer(consumer);
+            _audioStreamerService.RegisterNewConsumer(consumer);
             return Stream(_cancellationTokenSource.Token);
         }
 
         public void StopStreaming()
         {
-            _audioStreamer.UnregisterConsumer(_consumer.Id);
+            _audioStreamerService.UnregisterConsumer(_consumer.Id);
             _cancellationTokenSource.Cancel();
         }
 
@@ -42,7 +42,7 @@ namespace GrpcAudioStreaming.Server.Sources
         {
             var audioSample = new AudioSample();
 
-            await foreach (var (data, lengthMs) in _audioStreamer.Source.GetAsyncEnumerable(cancellationToken))
+            await foreach (var (data, lengthMs) in _audioStreamerService.Source.GetAsyncEnumerable(cancellationToken))
             {
                 audioSample.Timestamp = DateTime.Now.AddMilliseconds(-lengthMs).ToString("o");
                 audioSample.Data = UnsafeByteOperations.UnsafeWrap(data);
@@ -58,7 +58,7 @@ namespace GrpcAudioStreaming.Server.Sources
 
         public void Dispose()
         {
-            _audioStreamer.Dispose();
+            _audioStreamerService.Dispose();
             GC.SuppressFinalize(this);
         }
     }

@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using GrpcAudioStreaming.Client.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Client
 {
-    public class App(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings)
+    public class App(IServiceProvider serviceProvider, IOptions<ClientSettings> clientSettings)
     {
-        private readonly AppSettings _appSettings = appSettings.Value;
+        private readonly ClientSettings _clientSettings = clientSettings.Value;
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public async Task Run(string[] args)
@@ -26,9 +27,9 @@ namespace GrpcAudioStreaming.Client
                     client?.Disconnect();
                     client = null;
 
-                    if (_appSettings.AttemptAutomaticReconnect)
+                    if (_clientSettings.AttemptAutomaticReconnect)
                     {
-                        await Task.Delay(_appSettings.AutomaticReconnectDelay * 1000);
+                        await Task.Delay(_clientSettings.AutomaticReconnectDelay * 1000);
                     }
                     else
                     {

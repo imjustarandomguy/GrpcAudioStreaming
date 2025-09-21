@@ -2,7 +2,8 @@
 using GrpcAudioStreaming.Server.Services;
 using GrpcAudioStreaming.Server.Services.Recorders;
 using GrpcAudioStreaming.Server.Settings;
-using GrpcAudioStreaming.Server.Sources;
+using GrpcAudioStreaming.Server.Streamers.Grpc;
+using GrpcAudioStreaming.Server.Streamers.Tcp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -45,7 +46,8 @@ namespace GrpcAudioStreaming.Server
                 return RecorderEngineFactory.GetOrDefault(configuration.GetValue<string>("Engine"), codec, audioSettings);
             });
 
-            services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
+            services.AddTransient<IGrpcStreamer, LoopbackGrpcStreamer>();
+            services.AddHostedService<TcpStreamer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

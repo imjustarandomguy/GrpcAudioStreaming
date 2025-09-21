@@ -2,16 +2,16 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Models;
-using GrpcAudioStreaming.Server.Sources;
+using GrpcAudioStreaming.Server.Streamers.Grpc;
 using GrpcAudioStreaming.Server.Utils;
 using System;
 using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Server.Services;
 
-public class GrpcAudioStreamService(ICodec codec, IAudioSampleSource audioSampleSource) : AudioStream.AudioStreamBase
+public class GrpcAudioStreamService(ICodec codec, IGrpcStreamer audioSampleSource) : AudioStream.AudioStreamBase
 {
-    private readonly IAudioSampleSource _audioSampleSource = audioSampleSource;
+    private readonly IGrpcStreamer _audioSampleSource = audioSampleSource;
 
     public override Task GetStream(Empty request, IServerStreamWriter<AudioSample> responseStream, ServerCallContext context)
     {

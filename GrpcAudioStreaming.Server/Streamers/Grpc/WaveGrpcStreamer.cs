@@ -6,9 +6,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Server.Sources
+namespace GrpcAudioStreaming.Server.Streamers.Grpc
 {
-    public class WaveAudioSampleSource : IAudioSampleSource, IDisposable
+    public class WaveGrpcStreamer : IGrpcStreamer, IDisposable
     {
         public event EventHandler<AudioSample> AudioSampleCreated;
 
@@ -17,7 +17,7 @@ namespace GrpcAudioStreaming.Server.Sources
 
         public AudioFormat AudioFormat { get; }
 
-        public WaveAudioSampleSource(string file)
+        public WaveGrpcStreamer(string file)
         {
             _waveFileReader = new WaveFileReader(file);
             AudioFormat = _waveFileReader.WaveFormat.ToAudioFormat();

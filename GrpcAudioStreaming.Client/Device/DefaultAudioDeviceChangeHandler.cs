@@ -1,16 +1,17 @@
-﻿using NAudio.CoreAudioApi;
+﻿using GrpcAudioStreaming.Client.Players;
+using NAudio.CoreAudioApi;
 using System;
 using System.Text.RegularExpressions;
 
-namespace GrpcAudioStreaming.Client
+namespace GrpcAudioStreaming.Client.Device
 {
     public class DefaultAudioDeviceChangeHandler(DeviceAccessor deviceAccessor)
     {
-        public void Init(NAudioAudioPlayer audioPlayer)
+        public void Init(IAudioPlayer audioPlayer)
         {
             var changeNotifier = new DefaultAudioDeviceChangeNotifier();
 
-            changeNotifier.DefaultDeviceChanged += (DataFlow dataFlow, Role deviceRole, string defaultDeviceId) =>
+            changeNotifier.DefaultDeviceChanged += (dataFlow, deviceRole, defaultDeviceId) =>
             {
                 if (!audioPlayer.Initialized)
                 {

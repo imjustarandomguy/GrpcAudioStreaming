@@ -1,8 +1,10 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using GrpcAudioStreaming.Client.Device;
 using GrpcAudioStreaming.Client.Extensions;
 using GrpcAudioStreaming.Client.Models;
+using GrpcAudioStreaming.Client.Players;
 using GrpcAudioStreaming.Proto.Codecs;
 using Microsoft.Extensions.Options;
 using System;
@@ -15,17 +17,17 @@ namespace GrpcAudioStreaming.Client
     public class Client
     {
         private readonly ICodec _codec;
-        private readonly AppSettings _appSettings;
-        private readonly NAudioAudioPlayer _audioPlayer;
+        private readonly IAudioPlayer _audioPlayer;
+        private readonly ClientSettings _clientSettings;
         private readonly AsyncServerStreamingCall<AudioSample> _audioStream;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
         public ClientState State = ClientState.None;
 
-        public Client(NAudioAudioPlayer audioPlayer, DefaultAudioDeviceChangeHandler defaultAudioDeviceChangeHandler, IOptions<AppSettings> appSettings)
+        public Client(IAudioPlayer audioPlayer, DefaultAudioDeviceChangeHandler defaultAudioDeviceChangeHandler, IOptions<ClientSettings> clientSettings)
         {
             _audioPlayer = audioPlayer;
-            _appSettings = appSettings.Value;
+            _clientSettings = clientSettings.Value;
             _cancellationTokenSource = new CancellationTokenSource();
 
             var handler = new SocketsHttpHandler
@@ -37,7 +39,7 @@ namespace GrpcAudioStreaming.Client
 
             try
             {
-                var channel = GrpcChannel.ForAddress(_appSettings.ServerUrl, new GrpcChannelOptions { HttpHandler = handler });
+                var channel = GrpcChannel.ForAddress(_clientSettings.ServerUrl, new GrpcChannelOptions { HttpHandler = handler });
                 var client = new AudioStream.AudioStreamClient(channel);
                 var format = client.GetFormat(new Empty());
 
@@ -50,10 +52,7 @@ namespace GrpcAudioStreaming.Client
 
                 State = ClientState.Connected;
 
-                if (_appSettings.DefaultAudioDeviceChangeHandler)
-                {
-                    defaultAudioDeviceChangeHandler.Init(_audioPlayer);
-                }
+                defaultAudioDeviceChangeHandler.Init(_audioPlayer);
             }
             catch (Exception)
             {

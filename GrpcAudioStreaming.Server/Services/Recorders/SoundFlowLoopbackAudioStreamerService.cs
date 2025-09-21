@@ -1,32 +1,47 @@
 ﻿using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Settings;
 using Microsoft.Extensions.Options;
-using SoundFlow.Abstracts;
+using SoundFlow.Abstracts.Devices;
 using SoundFlow.Backends.MiniAudio;
 using SoundFlow.Components;
 using SoundFlow.Enums;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace GrpcAudioStreaming.Server.Services.Recorders;
 
 public class SoundFlowLoopbackAudioStreamerService(ICodec codec, IOptions<AudioSettings> audioSettings) : AbstractLoopbackAudioStreamerService(codec, audioSettings)
 {
-    private AudioEngine _audioEngine;
+    private MiniAudioEngine _audioEngine;
+    private AudioCaptureDevice _device;
     private Recorder _recorder;
 
     protected override void InitiateRecording()
     {
         base.InitiateRecording();
 
-        // TODO: Force to use 32-bit float format for now. Need to add support for 16-bit PCM.
         WaveFormat = NAudio.Wave.WaveFormat.CreateIeeeFloatWaveFormat(audioSettings.SampleRate, audioSettings.Channels);
+        //WaveFormat = new WaveFormat(audioSettings.SampleRate, 16, audioSettings.Channels);
 
-        var sampleFormat = WaveFormat.BitsPerSample == 16 ? SampleFormat.S16 : SampleFormat.F32;
+        var defaultCaptureDevice = _audioEngine.CaptureDevices.FirstOrDefault(d => d.IsDefault);
+        if (defaultCaptureDevice.Id == IntPtr.Zero)
+        {
+            Console.WriteLine("No default capture device found.");
+            return;
+        }
 
-        _audioEngine = new MiniAudioEngine(WaveFormat.SampleRate, Capability.Loopback, sampleFormat: sampleFormat);
+        var audioFormat = new SoundFlow.Structs.AudioFormat
+        {
+            Format = WaveFormat.BitsPerSample == 16 ? SampleFormat.S16 : SampleFormat.F32,
+            SampleRate = WaveFormat.SampleRate,
+            Channels = WaveFormat.Channels,
+        };
 
-        _recorder = new Recorder(ProcessAudio, sampleFormat: sampleFormat, sampleRate: WaveFormat.SampleRate, channels: WaveFormat.Channels);
+        _audioEngine = new MiniAudioEngine();
+        _device = _audioEngine.InitializeLoopbackDevice(audioFormat);
+
+        _recorder = new Recorder(_device, ProcessAudio);
 
         _recorder.StartRecording();
     }
@@ -35,6 +50,10 @@ public class SoundFlowLoopbackAudioStreamerService(ICodec codec, IOptions<AudioS
     {
         _recorder?.StopRecording();
         _recorder?.Dispose();
+
+        _device?.Stop();
+        _device?.Dispose();
+
         _audioEngine?.Dispose();
 
         base.StopRecording();

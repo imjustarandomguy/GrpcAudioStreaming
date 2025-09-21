@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GrpcAudioStreaming.Client.Players;
+using System;
 using System.Windows.Forms;
 
 namespace GrpcAudioStreaming.Client

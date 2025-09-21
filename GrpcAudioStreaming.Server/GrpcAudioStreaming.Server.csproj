@@ -23,9 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore.Server" Version="2.70.0" />
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.70.0" />
-        <PackageReference Include="SoundFlow" Version="1.0.3" />
+        <PackageReference Include="Grpc.AspNetCore.Server" Version="2.71.0" />
+        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.71.0" />
+        <PackageReference Include="SoundFlow" Version="1.2.1" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using GrpcAudioStreaming.Client.Device;
+using GrpcAudioStreaming.Client.Models;
+using GrpcAudioStreaming.Client.Players;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -46,11 +51,18 @@ namespace GrpcAudioStreaming.Client
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.Configure<AppSettings>(configuration.GetSection(AppSettings.RootPath));
+            services.Configure<ClientSettings>(configuration.GetSection(ClientSettings.SectionName));
+            services.Configure<PlayerSettings>(configuration.GetSection(PlayerSettings.SectionName));
 
             services.AddSingleton<DeviceAccessor>();
             services.AddTransient<App>();
-            services.AddScoped<NAudioAudioPlayer>();
+            services.AddScoped(provider =>
+            {
+                var deviceAccessor = provider.GetRequiredService<DeviceAccessor>();
+                var playerSettings = provider.GetRequiredService<IOptions<PlayerSettings>>();
+
+                return PlayerEngineFactory.GetOrDefault(configuration.GetValue<string>("Engine"), deviceAccessor, playerSettings);
+            });
             services.AddSingleton<Client>();
             services.AddSingleton<CustomApplicationContext>();
             services.AddScoped<DefaultAudioDeviceChangeHandler>();

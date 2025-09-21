@@ -1,13 +1,15 @@
+using GrpcAudioStreaming.Client.Device;
+using GrpcAudioStreaming.Client.Models;
 using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Client
+namespace GrpcAudioStreaming.Client.Players
 {
-    public class NAudioAudioPlayer(IOptions<AppSettings> appSettings, DeviceAccessor deviceAccessor) : IDisposable
+    public class NAudioAudioPlayer(IOptions<PlayerSettings> playerSettings, DeviceAccessor deviceAccessor) : IAudioPlayer, IDisposable
     {
-        private readonly AppSettings _appSettings = appSettings.Value;
+        private readonly PlayerSettings _playerSettings = playerSettings.Value;
         private readonly DeviceAccessor _deviceAccessor = deviceAccessor;
 
         private BufferedWaveProvider _bufferedWaveProvider;
@@ -27,24 +29,6 @@ namespace GrpcAudioStreaming.Client
             InitPlayer(Device);
 
             Initialized = true;
-        }
-
-        public void InitPlayer(Guid deviceId)
-        {
-            _bufferedWaveProvider = new BufferedWaveProvider(_waveFormat)
-            {
-                BufferDuration = TimeSpan.FromMilliseconds(_appSettings.BufferDuration),
-                DiscardOnBufferOverflow = _appSettings.DiscardOnBufferOverflow,
-            };
-
-            _player = new WaveOutEvent
-            {
-                DeviceNumber = -1,
-                DesiredLatency = _appSettings.PlayerDesiredLatency,
-                Volume = _appSettings.Volume,
-            };
-
-            _player.Init(_bufferedWaveProvider);
         }
 
         public void AddSample(byte[] sample)
@@ -93,6 +77,24 @@ namespace GrpcAudioStreaming.Client
             Stop();
             _player?.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        private void InitPlayer(Guid deviceId)
+        {
+            _bufferedWaveProvider = new BufferedWaveProvider(_waveFormat)
+            {
+                BufferDuration = TimeSpan.FromMilliseconds(_playerSettings.BufferDuration),
+                DiscardOnBufferOverflow = _playerSettings.DiscardOnBufferOverflow,
+            };
+
+            _player = new WaveOutEvent
+            {
+                DeviceNumber = -1,
+                DesiredLatency = _playerSettings.DesiredLatency,
+                Volume = _playerSettings.Volume,
+            };
+
+            _player.Init(_bufferedWaveProvider);
         }
     }
 }

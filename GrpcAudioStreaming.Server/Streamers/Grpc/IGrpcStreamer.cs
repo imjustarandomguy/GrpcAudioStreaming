@@ -2,9 +2,9 @@ using GrpcAudioStreaming.Server.Models;
 using System;
 using System.Threading.Tasks;
 
-namespace GrpcAudioStreaming.Server.Sources
+namespace GrpcAudioStreaming.Server.Streamers.Grpc
 {
-    public interface IAudioSampleSource
+    public interface IGrpcStreamer
     {
         event EventHandler<AudioSample> AudioSampleCreated;
 

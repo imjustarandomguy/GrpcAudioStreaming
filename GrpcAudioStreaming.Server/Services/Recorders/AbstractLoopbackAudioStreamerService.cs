@@ -5,15 +5,14 @@ using GrpcAudioStreaming.Server.Utils;
 using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 
 namespace GrpcAudioStreaming.Server.Services.Recorders;
 
 public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStreamerService, IDisposable
 {
-    protected readonly ICodec codec;
     protected readonly AudioSettings audioSettings;
+    protected ICodec Codec { get; private set; }
 
     public Dictionary<string, AudioConsumer> Consumers { get; private set; } = [];
     public AsyncEnumerableSource<(ReadOnlyMemory<byte> data, double lengthMs)> Source { get; protected set; } = new AsyncEnumerableSource<(ReadOnlyMemory<byte> data, double lengthMs)>();
@@ -21,11 +20,22 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
 
     public AbstractLoopbackAudioStreamerService(ICodec codec, IOptions<AudioSettings> audioSettings)
     {
-        this.codec = codec;
         this.audioSettings = audioSettings.Value;
+
         WaveFormat = this.audioSettings.BitsPerSample == 16
             ? new WaveFormat(this.audioSettings.SampleRate, this.audioSettings.BitsPerSample, this.audioSettings.Channels)
             : WaveFormat.CreateIeeeFloatWaveFormat(this.audioSettings.SampleRate, this.audioSettings.Channels);
+        Codec = codec;
+    }
+
+    public void SetWaveFormat(int sampleRate, int bits, int channels)
+    {
+        WaveFormat = new WaveFormat(sampleRate, bits, channels);
+    }
+
+    public void SetCodec(ICodec codec)
+    {
+        Codec = codec;
     }
 
     public void RegisterNewConsumer(AudioConsumer consumer)
@@ -38,7 +48,7 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
 
         if (Consumers.Count == 1)
         {
-            Console.WriteLine($"Consumer detected. Starting the recording.");
+            Console.WriteLine($"Consumer detected. Starting the recording. SampleRate: {WaveFormat.SampleRate}, Channels: {WaveFormat.Channels}, BitsPerSample: {WaveFormat.BitsPerSample}.");
             InitiateRecording();
         }
     }
@@ -76,7 +86,7 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
 
     protected ReadOnlyMemory<byte> Encode(ReadOnlySpan<byte> data)
     {
-        return codec.Encode(data.ToArray(), 0, data.Length);
+        return Codec.Encode(data.ToArray(), 0, data.Length);
 
         // TODO: Investigate if ArrayPool can be used to improve performance.
         // TODO: Rework codecs to use Spans instead of byte arrays.

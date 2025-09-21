@@ -27,7 +27,7 @@ namespace GrpcAudioStreaming.Client.Players
 
         public bool Initialized { get; private set; }
 
-        public Guid Device { get; private set; }
+        public string DeviceId { get; private set; }
         public NAudio.Wave.PlaybackState PlaybackState { get; private set; }
 
         public void Init(WaveFormat waveFormat)
@@ -105,9 +105,9 @@ namespace GrpcAudioStreaming.Client.Players
             GC.SuppressFinalize(this);
         }
 
-        public void SetDevice(Guid deviceId)
+        public void SetDevice(string deviceId)
         {
-            Device = deviceId;
+            DeviceId = deviceId;
             // SoundFlow currently does not support setting output device by GUID
             // This method is kept for interface compatibility
         }

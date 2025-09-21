@@ -1,9 +1,9 @@
 using GrpcAudioStreaming.Client.Device;
 using GrpcAudioStreaming.Client.Models;
 using Microsoft.Extensions.Options;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Client.Players
@@ -14,20 +14,20 @@ namespace GrpcAudioStreaming.Client.Players
         private readonly DeviceAccessor _deviceAccessor = deviceAccessor;
 
         private BufferedWaveProvider _bufferedWaveProvider;
-        private DirectSoundOut _player;
+        private IWavePlayer _player;
         private WaveFormat _waveFormat;
 
         public bool Initialized { get; private set; }
 
-        public Guid Device { get; private set; }
+        public string DeviceId { get; private set; }
         public PlaybackState PlaybackState => _player?.PlaybackState ?? PlaybackState.Stopped;
 
         public void Init(WaveFormat waveFormat)
         {
             _waveFormat = waveFormat;
 
-            Device = _deviceAccessor.Device;
-            InitPlayer(Device);
+            DeviceId = _deviceAccessor.DeviceId;
+            InitPlayer(DeviceId);
 
             Initialized = true;
         }
@@ -62,13 +62,13 @@ namespace GrpcAudioStreaming.Client.Players
             _player?.Play();
         }
 
-        public void SetDevice(Guid deviceId)
+        public void SetDevice(string deviceId)
         {
             Stop();
             _player?.Dispose();
 
-            Device = deviceId;
-            InitPlayer(Device);
+            DeviceId = deviceId;
+            InitPlayer(DeviceId);
 
             Play();
         }
@@ -80,28 +80,31 @@ namespace GrpcAudioStreaming.Client.Players
             GC.SuppressFinalize(this);
         }
 
-        private void InitPlayer(Guid deviceId)
+        private void InitPlayer(string deviceId)
         {
             _bufferedWaveProvider = new BufferedWaveProvider(_waveFormat)
             {
                 BufferDuration = TimeSpan.FromMilliseconds(_playerSettings.BufferDuration),
                 DiscardOnBufferOverflow = _playerSettings.DiscardOnBufferOverflow,
+                ReadFully = _playerSettings.ReadFully,
             };
 
-            var device = DirectSoundOut.Devices.FirstOrDefault(device => device.Description == playerSettings.Value.DeviceName);
-            var deviceNumber = DirectSoundOut.Devices.ToList().IndexOf(device);
+            var device = new MMDeviceEnumerator().GetDevice(deviceId);
 
-            _player = new DirectSoundOut(_deviceAccessor.Device, _playerSettings.DesiredLatency)
-            {
-                Volume = _playerSettings.Volume,
-            };
+            _player = new WasapiOut(device, AudioClientShareMode.Shared, true, _playerSettings.DesiredLatency);
+
+            //_player = new DirectSoundOut(_deviceAccessor.Device, _playerSettings.DesiredLatency);
 
             //_player = new WaveOutEvent
             //{
             //    DeviceNumber = -1,
             //    DesiredLatency = _playerSettings.DesiredLatency,
-            //    Volume = _playerSettings.Volume,
             //};
+
+            if (_playerSettings.Volume >= 0)
+            {
+                _player.Volume = _playerSettings.Volume;
+            }
 
             _player.Init(_bufferedWaveProvider);
         }

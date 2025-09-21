@@ -47,7 +47,7 @@ namespace GrpcAudioStreaming.Server
             });
 
             services.AddTransient<IGrpcStreamer, LoopbackGrpcStreamer>();
-            services.AddHostedService<TcpStreamer>();
+            //services.AddHostedService<TcpStreamer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

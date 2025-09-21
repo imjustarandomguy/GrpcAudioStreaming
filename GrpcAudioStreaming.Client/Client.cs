@@ -1,11 +1,11 @@
-﻿using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcAudioStreaming.Client.Device;
 using GrpcAudioStreaming.Client.Extensions;
 using GrpcAudioStreaming.Client.Models;
 using GrpcAudioStreaming.Client.Players;
+using GrpcAudioStreaming.Proto;
 using GrpcAudioStreaming.Proto.Codecs;
 using Microsoft.Extensions.Options;
 using System;
@@ -25,7 +25,7 @@ namespace GrpcAudioStreaming.Client
 
         public ClientState State = ClientState.None;
 
-        public Client(IAudioPlayer audioPlayer, DefaultAudioDeviceChangeHandler defaultAudioDeviceChangeHandler, IOptions<ClientSettings> clientSettings)
+        public Client(IAudioPlayer audioPlayer, DeviceAccessor deviceAccessor, IOptions<ClientSettings> clientSettings)
         {
             _audioPlayer = audioPlayer;
             _clientSettings = clientSettings.Value;
@@ -55,7 +55,21 @@ namespace GrpcAudioStreaming.Client
 
                 State = ClientState.Connected;
 
-                defaultAudioDeviceChangeHandler.Init(_audioPlayer);
+                DefaultAudioDeviceChangeHandler.Init((deviceId) =>
+                {
+                    if (!audioPlayer.Initialized)
+                    {
+                        return;
+                    }
+
+                    if (audioPlayer.DeviceId == deviceId)
+                    {
+                        return;
+                    }
+
+                    deviceAccessor.SetDeviceById(deviceId);
+                    audioPlayer.SetDevice(deviceId);
+                });
             }
             catch (Exception)
             {

@@ -77,7 +77,7 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
     public void Dispose()
     {
         Consumers = [];
-        Source?.Complete(); 
+        Source?.Complete();
         GC.SuppressFinalize(this);
     }
 

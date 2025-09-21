@@ -6,7 +6,7 @@ namespace GrpcAudioStreaming.Client.Players
 {
     public interface IAudioPlayer
     {
-        Guid Device { get; }
+        string DeviceId { get; }
         bool Initialized { get; }
         PlaybackState PlaybackState { get; }
 
@@ -15,7 +15,7 @@ namespace GrpcAudioStreaming.Client.Players
         void Init(WaveFormat waveFormat);
         void Play();
         Task Restart();
-        void SetDevice(Guid deviceId);
+        void SetDevice(string deviceId);
         void Stop();
     }
 }

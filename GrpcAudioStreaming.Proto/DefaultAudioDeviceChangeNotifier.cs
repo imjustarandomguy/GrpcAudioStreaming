@@ -1,9 +1,8 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System;
-using System.Diagnostics;
 
-namespace GrpcAudioStreaming.Client.Device
+namespace GrpcAudioStreaming.Proto
 {
     public class DefaultAudioDeviceChangeNotifier : IMMNotificationClient, IDisposable
     {

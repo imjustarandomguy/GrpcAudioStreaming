@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -65,7 +64,6 @@ namespace GrpcAudioStreaming.Client
             });
             services.AddSingleton<Client>();
             services.AddSingleton<CustomApplicationContext>();
-            services.AddScoped<DefaultAudioDeviceChangeHandler>();
         }
     }
 }

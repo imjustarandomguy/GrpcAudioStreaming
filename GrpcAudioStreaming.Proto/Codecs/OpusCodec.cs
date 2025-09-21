@@ -1,81 +1,106 @@
-using System;
-using Concentus.Structs;
+using Concentus;
 using Concentus.Enums;
+using NAudio.Wave;
+using System;
+using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace GrpcAudioStreaming.Proto.Codecs
 {
     public class OpusCodec : ICodec
     {
-        private readonly OpusEncoder _encoder;
-        private readonly OpusDecoder _decoder;
-        private readonly int _sampleRate;
-        private readonly int _channels;
-        private readonly int _frameSize;
+        // Use ArrayPool for buffer reuse
+        private byte[] _pcmBuffer = Array.Empty<byte>();
+        private int _pcmBufferCount = 0;
+        private IOpusEncoder _encoder;
+        private IOpusDecoder _decoder;
+        private WaveFormat _waveFormat = new WaveFormat(48000, 16, 2);
+        private int _frameSize = 480;
 
-        public OpusCodec(int sampleRate = 16000, int channels = 1, int frameSize = 960)
+        public void Initialize(WaveFormat waveFormat, int frameSize = 480)
         {
-            _sampleRate = sampleRate;
-            _channels = channels;
+            _waveFormat = waveFormat;
             _frameSize = frameSize;
-            _encoder = new OpusEncoder(_sampleRate, _channels, OpusApplication.OPUS_APPLICATION_AUDIO);
-            _decoder = new OpusDecoder(_sampleRate, _channels);
-        }
 
-        public byte[] Encode(byte[] data, int offset, int length)
-        {
-            short[] pcm = new short[length / 2];
-            for (int i = 0; i < pcm.Length; i++)
-            {
-                pcm[i] = (short)(data[offset + i * 2] | (data[offset + i * 2 + 1] << 8));
-            }
-            byte[] encoded = new byte[4000]; // Opus frame size upper bound
-            int encodedLength = _encoder.Encode(pcm, 0, _frameSize, encoded, 0, encoded.Length);
-            Array.Resize(ref encoded, encodedLength);
-            return encoded;
-        }
+            _encoder = OpusCodecFactory.CreateEncoder(_waveFormat.SampleRate, _waveFormat.Channels, OpusApplication.OPUS_APPLICATION_RESTRICTED_LOWDELAY);
+            _decoder = OpusCodecFactory.CreateDecoder(_waveFormat.SampleRate, _waveFormat.Channels);
 
-        public byte[] Decode(byte[] data, int offset, int length)
-        {
-            short[] decodedPcm = new short[_frameSize * _channels];
-            int decodedSamples = _decoder.Decode(data, offset, length, decodedPcm, 0, _frameSize, false);
-            byte[] decoded = new byte[decodedSamples * 2];
-            for (int i = 0; i < decodedSamples; i++)
-            {
-                decoded[i * 2] = (byte)(decodedPcm[i] & 0xFF);
-                decoded[i * 2 + 1] = (byte)(decodedPcm[i] >> 8);
-            }
-            return decoded;
+            // Allocate buffer for 1 second of audio max
+            int maxPcmBytes = _waveFormat.SampleRate * _waveFormat.Channels * 2;
+            _pcmBuffer = ArrayPool<byte>.Shared.Rent(maxPcmBytes);
+            _pcmBufferCount = 0;
         }
 
         public int Encode(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            int samples = input.Length / 2;
-            short[] pcm = new short[samples];
-            for (int i = 0; i < samples; i++)
+            // Append input to buffer
+            input.CopyTo(_pcmBuffer.AsSpan(_pcmBufferCount));
+            _pcmBufferCount += input.Length;
+
+            int bytesWritten = 0;
+            int frameBytes = _frameSize * _waveFormat.Channels * 2;
+
+            while (_pcmBufferCount >= frameBytes)
             {
-                pcm[i] = (short)(input[i * 2] | (input[i * 2 + 1] << 8));
+                // Use MemoryMarshal.Cast for conversion
+                var frameSpan = _pcmBuffer.AsSpan(0, frameBytes);
+                var pcmShorts = MemoryMarshal.Cast<byte, short>(frameSpan);
+
+                int maxEncoded = output.Length - bytesWritten - 2;
+                if (maxEncoded <= 0) break;
+
+                int encodedLength = _encoder.Encode(pcmShorts, _frameSize, output.Slice(bytesWritten + 2, maxEncoded), maxEncoded);
+
+                // Write 2-byte big-endian length
+                output[bytesWritten] = (byte)(encodedLength >> 8);
+                output[bytesWritten + 1] = (byte)(encodedLength & 0xFF);
+
+                bytesWritten += 2 + encodedLength;
+
+                // Shift buffer left
+                Buffer.BlockCopy(_pcmBuffer, frameBytes, _pcmBuffer, 0, _pcmBufferCount - frameBytes);
+                _pcmBufferCount -= frameBytes;
             }
-            byte[] temp = new byte[output.Length];
-            int encodedLength = _encoder.Encode(pcm, 0, _frameSize, temp, 0, temp.Length);
-            temp.AsSpan(0, encodedLength).CopyTo(output);
-            return encodedLength;
+
+            return bytesWritten;
         }
 
         public int Decode(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            short[] decodedPcm = new short[_frameSize * _channels];
-            int decodedSamples = _decoder.Decode(input.ToArray(), 0, input.Length, decodedPcm, 0, _frameSize, false);
-            for (int i = 0; i < decodedSamples; i++)
+            int inputOffset = 0;
+            int outputOffset = 0;
+            Span<short> pcmShorts = stackalloc short[_frameSize * _waveFormat.Channels];
+
+            while (inputOffset + 2 <= input.Length)
             {
-                output[i * 2] = (byte)(decodedPcm[i] & 0xFF);
-                output[i * 2 + 1] = (byte)(decodedPcm[i] >> 8);
+                int frameLength = (input[inputOffset] << 8) | input[inputOffset + 1];
+                inputOffset += 2;
+
+                if (inputOffset + frameLength > input.Length) break;
+
+                int decodedSamples = _decoder.Decode(input.Slice(inputOffset, frameLength), pcmShorts, _frameSize, false);
+
+                int bytesToCopy = decodedSamples * _waveFormat.Channels * 2;
+
+                // Use MemoryMarshal.Cast for conversion
+                var pcmBytes = MemoryMarshal.AsBytes(pcmShorts.Slice(0, decodedSamples * _waveFormat.Channels));
+                pcmBytes.CopyTo(output.Slice(outputOffset, bytesToCopy));
+                outputOffset += bytesToCopy;
+
+                inputOffset += frameLength;
             }
-            return decodedSamples * 2;
+
+            return outputOffset;
         }
 
         public int GetMaxEncodedSize(int inputLength)
         {
             return 4000;
+        }
+
+        public int GetMaxDecodedSize(int inputLength)
+        {
+            return inputLength * 50;
         }
     }
 }

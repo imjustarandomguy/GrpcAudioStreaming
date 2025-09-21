@@ -1,17 +1,18 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 
 namespace GrpcAudioStreaming.Proto.Codecs
 {
     public interface ICodec
     {
-        byte[] Encode(byte[] data, int offset, int length);
-
-        byte[] Decode(byte[] data, int offset, int length);
+        void Initialize(WaveFormat waveFormat, int frameSize = 480);
 
         int Encode(ReadOnlySpan<byte> input, Span<byte> output);
 
         int Decode(ReadOnlySpan<byte> input, Span<byte> output);
 
         int GetMaxEncodedSize(int inputLength);
+
+        int GetMaxDecodedSize(int inputLength);
     }
 }

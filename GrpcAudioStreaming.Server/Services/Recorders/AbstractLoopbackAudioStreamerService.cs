@@ -26,6 +26,8 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
             ? new WaveFormat(this.audioSettings.SampleRate, this.audioSettings.BitsPerSample, this.audioSettings.Channels)
             : WaveFormat.CreateIeeeFloatWaveFormat(this.audioSettings.SampleRate, this.audioSettings.Channels);
         Codec = codec;
+
+        codec.Initialize(WaveFormat);
     }
 
     public void SetWaveFormat(int sampleRate, int bits, int channels)

@@ -7,9 +7,9 @@ namespace GrpcAudioStreaming.Client
     public class CustomApplicationContext : ApplicationContext
     {
         private readonly NotifyIcon _trayIcon;
-        private readonly NAudioAudioPlayer _audioPlayer;
+        private readonly IAudioPlayer _audioPlayer;
 
-        public CustomApplicationContext(NAudioAudioPlayer audioPlayer)
+        public CustomApplicationContext(IAudioPlayer audioPlayer)
         {
             _audioPlayer = audioPlayer;
 

@@ -62,7 +62,7 @@ namespace GrpcAudioStreaming.Server.Streamers.Tcp
             {
                 using var networkStream = client.GetStream();
 
-                _audioStreamerService.SetWaveFormat(44100, 16, 2);
+                _audioStreamerService.SetWaveFormat(48000, 16, 2);
                 _audioStreamerService.SetCodec(CodecFactory.GetOrDefault(Codecs.Pcm));
 
                 _audioStreamerService.RegisterNewConsumer(new Models.AudioConsumer(client.Client.RemoteEndPoint.ToString(), client.Client.RemoteEndPoint.ToString()));

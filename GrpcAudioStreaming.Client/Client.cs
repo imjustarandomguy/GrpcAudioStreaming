@@ -1,4 +1,5 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcAudioStreaming.Client.Device;
@@ -42,8 +43,10 @@ namespace GrpcAudioStreaming.Client
                 var channel = GrpcChannel.ForAddress(_clientSettings.ServerUrl, new GrpcChannelOptions { HttpHandler = handler });
                 var client = new AudioStream.AudioStreamClient(channel);
                 var format = client.GetFormat(new Empty());
+                var waveFormat = format.ToWaveFormat();
 
                 _codec = CodecFactory.GetOrDefault(format.Codec);
+                _codec.Initialize(waveFormat);
 
                 _audioPlayer.Init(format.ToWaveFormat());
                 _audioPlayer.Play();
@@ -65,7 +68,10 @@ namespace GrpcAudioStreaming.Client
         {
             await foreach (var sample in _audioStream.ResponseStream.ReadAllAsync(_cancellationTokenSource.Token))
             {
-                _audioPlayer.AddSample(_codec.Decode(sample.Data.ToByteArray(), 0, sample.Data.Length));
+                var decoded = new byte[_codec.GetMaxDecodedSize(sample.Data.Length)];
+                var decodedLength = _codec.Decode(sample.Data.Span, decoded);
+
+                _audioPlayer.AddSample(decoded.AsSpan(0, decodedLength).ToArray());
             }
         }
 

@@ -1,22 +1,11 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 
 namespace GrpcAudioStreaming.Proto.Codecs
 {
     public class RawPcmCodec : ICodec
     {
-        public byte[] Encode(byte[] data, int offset, int length)
-        {
-            var encoded = new byte[length];
-            new ReadOnlySpan<byte>(data, offset, length).CopyTo(encoded);
-            return encoded;
-        }
-
-        public byte[] Decode(byte[] data, int offset, int length)
-        {
-            var decoded = new byte[length];
-            new ReadOnlySpan<byte>(data, offset, length).CopyTo(decoded);
-            return decoded;
-        }
+        public void Initialize(WaveFormat waveFormat, int frameSize = 480) { }
 
         public int Encode(ReadOnlySpan<byte> input, Span<byte> output)
         {
@@ -31,6 +20,11 @@ namespace GrpcAudioStreaming.Proto.Codecs
         }
 
         public int GetMaxEncodedSize(int inputLength)
+        {
+            return inputLength;
+        }
+
+        public int GetMaxDecodedSize(int inputLength)
         {
             return inputLength;
         }

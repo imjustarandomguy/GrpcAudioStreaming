@@ -3,6 +3,7 @@ using GrpcAudioStreaming.Client.Models;
 using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GrpcAudioStreaming.Client.Players
@@ -13,7 +14,7 @@ namespace GrpcAudioStreaming.Client.Players
         private readonly DeviceAccessor _deviceAccessor = deviceAccessor;
 
         private BufferedWaveProvider _bufferedWaveProvider;
-        private WaveOutEvent _player;
+        private DirectSoundOut _player;
         private WaveFormat _waveFormat;
 
         public bool Initialized { get; private set; }
@@ -87,12 +88,20 @@ namespace GrpcAudioStreaming.Client.Players
                 DiscardOnBufferOverflow = _playerSettings.DiscardOnBufferOverflow,
             };
 
-            _player = new WaveOutEvent
+            var device = DirectSoundOut.Devices.FirstOrDefault(device => device.Description == playerSettings.Value.DeviceName);
+            var deviceNumber = DirectSoundOut.Devices.ToList().IndexOf(device);
+
+            _player = new DirectSoundOut(_deviceAccessor.Device, _playerSettings.DesiredLatency)
             {
-                DeviceNumber = -1,
-                DesiredLatency = _playerSettings.DesiredLatency,
                 Volume = _playerSettings.Volume,
             };
+
+            //_player = new WaveOutEvent
+            //{
+            //    DeviceNumber = -1,
+            //    DesiredLatency = _playerSettings.DesiredLatency,
+            //    Volume = _playerSettings.Volume,
+            //};
 
             _player.Init(_bufferedWaveProvider);
         }

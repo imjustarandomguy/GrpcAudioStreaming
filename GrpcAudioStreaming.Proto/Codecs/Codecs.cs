@@ -4,5 +4,6 @@
     {
         Pcm,
         Mulaw,
+        Opus,
     }
 }

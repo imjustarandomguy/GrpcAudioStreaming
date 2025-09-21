@@ -86,31 +86,18 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
 
     protected ReadOnlyMemory<byte> Encode(ReadOnlySpan<byte> data)
     {
-        return Codec.Encode(data.ToArray(), 0, data.Length);
+        int maxOutputSize = Codec.GetMaxEncodedSize(data.Length);
+        var outputBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(maxOutputSize);
 
-        // TODO: Investigate if ArrayPool can be used to improve performance.
-        // TODO: Rework codecs to use Spans instead of byte arrays.
-
-        //byte[] rentedOutputBuffer = null;
-
-        //try
-        //{
-        //    rentedOutputBuffer = ArrayPool<byte>.Shared.Rent(data.Length);
-
-        //    var encodedLength = codec.GetEncodedSize(data.Length);
-        //    var encodedSpan = rentedOutputBuffer.AsSpan(0, encodedLength);
-
-        //    codec.Encode(data, encodedSpan);
-
-        //    return rentedOutputBuffer;
-        //}
-        //finally
-        //{
-        //    if (rentedOutputBuffer != null)
-        //    {
-        //        ArrayPool<byte>.Shared.Return(rentedOutputBuffer);
-        //    }
-        //}
+        try
+        {
+            int encodedLength = Codec.Encode(data, outputBuffer);
+            return new ReadOnlyMemory<byte>(outputBuffer, 0, encodedLength);
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(outputBuffer);
+        }
     }
 
     protected void AddData(ReadOnlySpan<byte> data, ReadOnlyMemory<byte> encodedData)

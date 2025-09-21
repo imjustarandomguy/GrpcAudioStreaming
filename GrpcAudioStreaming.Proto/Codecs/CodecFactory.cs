@@ -10,7 +10,10 @@ namespace GrpcAudioStreaming.Proto.Codecs
             {
                 return Codecs.Mulaw;
             }
-
+            if (codec is OpusCodec)
+            {
+                return Codecs.Opus;
+            }
             return Codecs.Pcm;
         }
 
@@ -25,8 +28,9 @@ namespace GrpcAudioStreaming.Proto.Codecs
             return codec switch
             {
                 Codecs.Mulaw => new MuLawCodec(),
+                Codecs.Opus => new OpusCodec(),
                 _ => new RawPcmCodec(),
-            }; ;
+            };
         }
     }
 }

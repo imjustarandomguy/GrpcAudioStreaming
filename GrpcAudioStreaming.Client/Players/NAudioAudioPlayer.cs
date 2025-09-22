@@ -89,7 +89,9 @@ namespace GrpcAudioStreaming.Client.Players
                 ReadFully = _playerSettings.ReadFully,
             };
 
-            var device = new MMDeviceEnumerator().GetDevice(deviceId);
+            var device = !string.IsNullOrEmpty(deviceId)
+                ? new MMDeviceEnumerator().GetDevice(deviceId)
+                : new MMDeviceEnumerator().GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
 
             _player = new WasapiOut(device, AudioClientShareMode.Shared, true, _playerSettings.DesiredLatency);
 

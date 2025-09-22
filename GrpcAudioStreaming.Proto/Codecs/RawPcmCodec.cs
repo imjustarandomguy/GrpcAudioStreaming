@@ -7,7 +7,7 @@ namespace GrpcAudioStreaming.Proto.Codecs
     {
         public void Initialize(WaveFormat waveFormat, int frameSize = 480) { }
 
-        public int Encode(ReadOnlySpan<byte> input, Span<byte> output)
+        public int Encode(Span<byte> input, Span<byte> output)
         {
             input.CopyTo(output);
             return input.Length;

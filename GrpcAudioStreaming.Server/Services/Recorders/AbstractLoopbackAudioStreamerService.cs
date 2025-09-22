@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace GrpcAudioStreaming.Server.Services.Recorders;
 
@@ -86,8 +87,11 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
         return bytesRecorded / (double)(WaveFormat.SampleRate * WaveFormat.Channels * (WaveFormat.BitsPerSample / 8)) * 1000;
     }
 
-    protected ReadOnlyMemory<byte> Encode(ReadOnlySpan<byte> data)
+    protected ReadOnlyMemory<byte> Encode(Span<byte> data)
     {
+        //Stopwatch stopwatch = new Stopwatch();
+        //stopwatch.Start();
+
         int maxOutputSize = Codec.GetMaxEncodedSize(data.Length);
         var outputBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(maxOutputSize);
 
@@ -99,6 +103,9 @@ public abstract class AbstractLoopbackAudioStreamerService : ILoopbackAudioStrea
         finally
         {
             System.Buffers.ArrayPool<byte>.Shared.Return(outputBuffer);
+
+            //stopwatch.Stop();
+            //Debug.WriteLine($"Encoding: {stopwatch.ElapsedTicks}");
         }
     }
 

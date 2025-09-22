@@ -9,6 +9,7 @@ using GrpcAudioStreaming.Proto;
 using GrpcAudioStreaming.Proto.Codecs;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,10 +83,21 @@ namespace GrpcAudioStreaming.Client
         {
             await foreach (var sample in _audioStream.ResponseStream.ReadAllAsync(_cancellationTokenSource.Token))
             {
+                //Debug.WriteLine($"Size: {sample.Data.Length}");
+                //Debug.WriteLine($"Latency: {(DateTime.UtcNow - DateTime.Parse(sample.Timestamp)).Microseconds}");
+
+                //Stopwatch stopwatch = new Stopwatch();
+                //stopwatch.Start();
+
                 var decoded = new byte[_codec.GetMaxDecodedSize(sample.Data.Length)];
                 var decodedLength = _codec.Decode(sample.Data.Span, decoded);
+                var data = decoded.AsSpan(0, decodedLength).ToArray();
 
-                _audioPlayer.AddSample(decoded.AsSpan(0, decodedLength).ToArray());
+                //stopwatch.Stop();
+                //Debug.WriteLine($"Decoding: {stopwatch.ElapsedTicks}");
+                //Debug.WriteLine("");
+
+                _audioPlayer.AddSample(data);
             }
         }
 

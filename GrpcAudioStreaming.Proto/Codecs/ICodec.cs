@@ -7,7 +7,7 @@ namespace GrpcAudioStreaming.Proto.Codecs
     {
         void Initialize(WaveFormat waveFormat, int frameSize = 480);
 
-        int Encode(ReadOnlySpan<byte> input, Span<byte> output);
+        int Encode(Span<byte> input, Span<byte> output);
 
         int Decode(ReadOnlySpan<byte> input, Span<byte> output);
 

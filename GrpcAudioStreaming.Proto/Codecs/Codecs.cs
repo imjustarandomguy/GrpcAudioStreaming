@@ -5,5 +5,6 @@
         Pcm,
         Mulaw,
         Opus,
+        Opus2,
     }
 }

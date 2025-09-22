@@ -31,7 +31,7 @@ namespace GrpcAudioStreaming.Proto.Codecs
             _pcmBufferCount = 0;
         }
 
-        public int Encode(ReadOnlySpan<byte> input, Span<byte> output)
+        public int Encode(Span<byte> input, Span<byte> output)
         {
             // Append input to buffer
             input.CopyTo(_pcmBuffer.AsSpan(_pcmBufferCount));

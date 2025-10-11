@@ -15,6 +15,18 @@ namespace GrpcAudioStreaming.Server
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
             {
+                webBuilder.ConfigureKestrel(options =>
+                {
+                    options.ListenAnyIP(5001, listenOptions =>
+                    {
+                        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+                    });
+                    options.ListenAnyIP(5002, listenOptions =>
+                    {
+                        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
+                    });
+                });
+
                 webBuilder.UseStartup<Startup>();
             });
     }

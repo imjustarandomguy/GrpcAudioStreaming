@@ -21,4 +21,6 @@ message AudioFormat {
   int32 ExtraSize = 5;
   int32 SampleRate = 6;
   string Encoding = 7;
+  string Codec = 8;
+  string Timestamp = 9;
 }

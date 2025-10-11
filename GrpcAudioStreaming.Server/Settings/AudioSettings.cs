@@ -4,7 +4,7 @@
     {
         public const string RootPath = "AudioSettings";
 
-        public int SampleRate { get; set; } = 44100;
+        public int SampleRate { get; set; } = 48000;
 
         public int BitsPerSample { get; set; } = 16;
 

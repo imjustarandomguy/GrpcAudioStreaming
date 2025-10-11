@@ -5,10 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.28.3" />
+        <PackageReference Include="Concentus" Version="2.2.2" />
+        <PackageReference Include="Concentus.Native" Version="1.5.2" />
+        <PackageReference Include="Google.Protobuf" Version="3.32.1" />
         <PackageReference Include="Grpc.Core" Version="2.46.6" />
-        <PackageReference Include="Grpc.Tools" Version="2.67.0" PrivateAssets="All" />
+        <PackageReference Include="Grpc.Tools" Version="2.72.0" PrivateAssets="All" />
         <PackageReference Include="NAudio" Version="2.2.1" />
+        <PackageReference Include="OpusSharp" Version="1.5.7" />
+        <PackageReference Include="OpusSharp.Natives" Version="1.5.2.2" />
     </ItemGroup>
 
     <ItemGroup>

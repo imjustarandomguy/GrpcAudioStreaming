@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GrpcAudioStreaming.Client.Players;
+using System;
 using System.Windows.Forms;
 
 namespace GrpcAudioStreaming.Client
@@ -6,9 +7,9 @@ namespace GrpcAudioStreaming.Client
     public class CustomApplicationContext : ApplicationContext
     {
         private readonly NotifyIcon _trayIcon;
-        private readonly AudioPlayer _audioPlayer;
+        private readonly IAudioPlayer _audioPlayer;
 
-        public CustomApplicationContext(AudioPlayer audioPlayer)
+        public CustomApplicationContext(IAudioPlayer audioPlayer)
         {
             _audioPlayer = audioPlayer;
 
@@ -28,8 +29,13 @@ namespace GrpcAudioStreaming.Client
 
         private void ExitApplication(object sender, EventArgs e)
         {
-            _trayIcon.Visible = false;
-            Environment.Exit(0);
+            DialogResult result = MessageBox.Show("Do you want to exit?", "Exit?", MessageBoxButtons.YesNo);
+
+            if (result == DialogResult.Yes)
+            {
+                _trayIcon.Visible = false;
+                Environment.Exit(0);
+            }
         }
 
         private void TogglePlayStop(object sender, EventArgs e)

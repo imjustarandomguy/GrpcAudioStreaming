@@ -1,36 +1,44 @@
 ﻿using NAudio.Codecs;
+using NAudio.Wave;
 using System;
 
 namespace GrpcAudioStreaming.Proto.Codecs
 {
     public class MuLawCodec : ICodec
     {
-        public byte[] Encode(byte[] data, int offset, int length)
+        public void Initialize(WaveFormat waveFormat, int frameSize = 480) { }
+
+        public int Encode(Span<byte> input, Span<byte> output)
         {
-            var encoded = new byte[length / 2];
             int outIndex = 0;
-
-            for (int n = 0; n < length; n += 2)
+            for (int n = 0; n < input.Length; n += 2)
             {
-                encoded[outIndex++] = MuLawEncoder.LinearToMuLawSample(BitConverter.ToInt16(data, offset + n));
+                short sample = (short)(input[n] | (input[n + 1] << 8));
+                output[outIndex++] = MuLawEncoder.LinearToMuLawSample(sample);
             }
-
-            return encoded;
+            return outIndex;
         }
 
-        public byte[] Decode(byte[] data, int offset, int length)
+        public int Decode(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            var decoded = new byte[length * 2];
             int outIndex = 0;
-
-            for (int n = 0; n < length; n++)
+            for (int n = 0; n < input.Length; n++)
             {
-                short decodedSample = MuLawDecoder.MuLawToLinearSample(data[n + offset]);
-                decoded[outIndex++] = (byte)(decodedSample & 0xFF);
-                decoded[outIndex++] = (byte)(decodedSample >> 8);
+                short decodedSample = MuLawDecoder.MuLawToLinearSample(input[n]);
+                output[outIndex++] = (byte)(decodedSample & 0xFF);
+                output[outIndex++] = (byte)(decodedSample >> 8);
             }
+            return outIndex;
+        }
 
-            return decoded;
+        public int GetMaxEncodedSize(int inputLength)
+        {
+            return inputLength / 2;
+        }
+
+        public int GetMaxDecodedSize(int inputLength)
+        {
+            return inputLength * 2;
         }
     }
 }

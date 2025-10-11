@@ -14,7 +14,7 @@ namespace GrpcAudioStreaming.Server.Extensions
                 Channels = waveFormat.Channels,
                 ExtraSize = waveFormat.ExtraSize,
                 SampleRate = waveFormat.SampleRate,
-                Encoding = waveFormat.Encoding.ToString()
+                Encoding = waveFormat.Encoding.ToString(),
             };
         }
     }

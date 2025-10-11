@@ -1,13 +1,15 @@
 ﻿using GrpcAudioStreaming.Proto.Codecs;
 using GrpcAudioStreaming.Server.Services;
+using GrpcAudioStreaming.Server.Services.Recorders;
 using GrpcAudioStreaming.Server.Settings;
-using GrpcAudioStreaming.Server.Sources;
+using GrpcAudioStreaming.Server.Streamers.Grpc;
+using GrpcAudioStreaming.Server.Streamers.Tcp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System.IO;
 
 namespace GrpcAudioStreaming.Server
@@ -25,11 +27,27 @@ namespace GrpcAudioStreaming.Server
                 .Build();
 
             services.Configure<AudioSettings>(configuration.GetSection(AudioSettings.RootPath));
-             
+
+            services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+            }));
+
+            var codec = CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec"));
+
             services.AddGrpc();
-            services.AddSingleton(CodecFactory.GetOrDefault(configuration.GetValue<string>($"{AudioSettings.RootPath}:Codec")));
-            services.AddSingleton<LoopbackAudioStreamerService>();
-            services.AddTransient<IAudioSampleSource, LoopbackAudioSampleSource>();
+            services.AddSingleton(codec);
+
+            services.AddSingleton(provider =>
+            {
+                var audioSettings = provider.GetRequiredService<IOptions<AudioSettings>>();
+                return RecorderEngineFactory.GetOrDefault(configuration.GetValue<string>("Engine"), codec, audioSettings);
+            });
+
+            services.AddTransient<IGrpcStreamer, LoopbackGrpcStreamer>();
+            //services.AddHostedService<TcpStreamer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,15 +59,13 @@ namespace GrpcAudioStreaming.Server
             }
 
             app.UseRouting();
+            app.UseGrpcWeb();
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GrpcAudioStreamService>();
-
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-                });
+                endpoints.MapGrpcService<GrpcAudioStreamService>().EnableGrpcWeb().RequireCors("AllowAll");
+                endpoints.MapGet("/", () => "gRPC server running...");
             });
         }
     }

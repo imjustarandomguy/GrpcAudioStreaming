@@ -8,8 +8,10 @@
         <PackageIcon>icon.ico</PackageIcon>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <PublishSingleFile>true</PublishSingleFile>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <PublishReadyToRun>true</PublishReadyToRun>
-        <ServerGarbageCollection>false</ServerGarbageCollection>
+        <ServerGarbageCollection>true</ServerGarbageCollection>
+		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
         <Version>1.0.0</Version>
     </PropertyGroup>
 

@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Concentus" Version="2.2.2" />
         <PackageReference Include="Concentus.Native" Version="1.5.2" />
-        <PackageReference Include="Google.Protobuf" Version="3.32.1" />
+        <PackageReference Include="Google.Protobuf" Version="3.33.0" />
         <PackageReference Include="Grpc.Core" Version="2.46.6" />
-        <PackageReference Include="Grpc.Tools" Version="2.72.0" PrivateAssets="All" />
+        <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="OpusSharp" Version="1.5.7" />
         <PackageReference Include="OpusSharp.Natives" Version="1.5.2.2" />
+		<PackageReference Include="SoundFlow" Version="1.2.1" />
     </ItemGroup>
 
     <ItemGroup>

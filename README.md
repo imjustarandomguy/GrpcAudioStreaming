@@ -6,7 +6,7 @@ Supported codec
 - `Pcm` (LPCM) (raw data)
 - `Mulaw` (G.711 mu-law)
 
-Requires .NET 9
+Requires .NET 10
 
 Only supports Windows.
 
